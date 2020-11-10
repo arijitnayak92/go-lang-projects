@@ -1,7 +1,7 @@
 package main
 
 import (
-	"mvc/app"
+	"github.com/arijitnayak92/taskAfford/mvc/app"
 )
 
 func main() {

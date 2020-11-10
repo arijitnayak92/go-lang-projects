@@ -1,8 +1,9 @@
 package app
 
 import (
-	"mvc/controllers"
 	"net/http"
+
+	"github.com/arijitnayak92/taskAfford/mvc/controllers"
 )
 
 func StartApp() {
