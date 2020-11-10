@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/arijitnayak92/taskAfford/mvc/controllers"
+	"github.com/arijitnayak92/taskAfford/REST/controllers"
 )
 
 func StartApp() {
