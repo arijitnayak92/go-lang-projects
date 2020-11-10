@@ -1,3 +1,3 @@
-module github.com/arijitnayak92/taskAfford/tree/main/mvc
+module github.com/arijitnayak92/taskAfford/mvc
 
 go 1.15
