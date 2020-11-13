@@ -1,6 +1,6 @@
 package main
 
-import "github.com/arijitnayak92/taskAfford/REST FIBO REDIS/cache"
+import "github.com/arijitnayak92/taskAfford/REST FIBO REDISs/cache"
 
 func main() {
 
