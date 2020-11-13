@@ -1,22 +1,22 @@
 package app
 
 import (
-	"fmt"
-	"net/http"
-
-	"github.com/arijitnayak92/taskAfford/REST/controllers"
+	"github.com/gin-gonic/gin"
 )
 
-func response(res http.ResponseWriter, req *http.Request) {
-	fmt.Fprintf(res, "Backend Responding !")
+var (
+	router *gin.Engine
+)
+
+func init() {
+	gin.SetMode(gin.ReleaseMode)
+	router = gin.Default()
 }
 
 func StartApp() {
-	http.HandleFunc("/", response)
-	http.HandleFunc("/users", controllers.GetUser)
-	err := http.ListenAndServe(":8080", nil)
+	Routes()
+	err := router.Run(":8080")
 	if err != nil {
 		panic(err)
 	}
-	fmt.Print("Server Connected !")
 }

@@ -1,26 +1,35 @@
 package controllers
 
 import (
-	"encoding/json"
-	"net/http"
 	"strconv"
 
 	"github.com/arijitnayak92/taskAfford/REST/services"
+	"github.com/arijitnayak92/taskAfford/REST/utils"
+	"github.com/gin-gonic/gin"
 )
 
-func GetUser(res http.ResponseWriter, req *http.Request) {
-	userId, err := strconv.ParseInt(req.URL.Query().Get("user_id"), 10, 64)
+func GetUser(c *gin.Context) {
+	userId, err := strconv.ParseInt(c.Query("user_id"), 10, 64)
 	if err != nil {
-		res.WriteHeader(403)
-		res.Write([]byte("User Id Should be a number "))
+		apiError := &utils.APIError{
+			Message:    "User Id shoudl be a number !",
+			StatusCode: 400,
+		}
+		c.JSON(apiError.StatusCode, apiError)
+		// jsonValue, _ := json.Marshal(apiError)
+		// res.WriteHeader(apiError.StatusCode)
+		// res.Write(jsonValue)
 		return
 	}
-	user, err := services.GetUser(userId)
-	if err != nil {
-		res.WriteHeader(http.StatusNotFound)
-		res.Write([]byte("User Not Found !"))
+	user, apiError := services.UserService.GetUser(userId)
+	if apiError != nil {
+		// jsonValue, _ := json.Marshal(apiError)
+		// res.WriteHeader(apiError.StatusCode)
+		// res.Write(jsonValue)
+		c.JSON(apiError.StatusCode, apiError)
 		return
 	}
-	jsonValue, _ := json.Marshal(user)
-	res.Write(jsonValue)
+	// jsonValue, _ := json.Marshal(user)
+	c.JSON(200, user)
+	//res.Write(200,user)
 }
