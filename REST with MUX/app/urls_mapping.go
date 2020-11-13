@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/arijitnayak92/taskAfford/REST/controllers"
+	"github.com/arijitnayak92/taskAfford/REST with MUX/controllers"
 )
 
 func response(res http.ResponseWriter, req *http.Request) {

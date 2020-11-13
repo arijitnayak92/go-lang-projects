@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/arijitnayak92/taskAfford/REST/domain"
-	"github.com/arijitnayak92/taskAfford/REST/services"
-	"github.com/arijitnayak92/taskAfford/REST/utils"
+	"github.com/arijitnayak92/taskAfford/REST with MUX/domain"
+	"github.com/arijitnayak92/taskAfford/REST with MUX/services"
+	"github.com/arijitnayak92/taskAfford/REST with MUX/utils"
 	"github.com/gorilla/mux"
 )
 

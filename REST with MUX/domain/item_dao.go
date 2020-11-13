@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/arijitnayak92/taskAfford/REST/utils"
+	"github.com/arijitnayak92/taskAfford/REST with MUX/utils"
 	"go.mongodb.org/mongo-driver/bson"
 )
 

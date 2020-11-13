@@ -1,8 +1,8 @@
 package services
 
 import (
-	"github.com/arijitnayak92/taskAfford/REST/domain"
-	"github.com/arijitnayak92/taskAfford/REST/utils"
+	"github.com/arijitnayak92/taskAfford/REST with MUX/domain"
+	"github.com/arijitnayak92/taskAfford/REST with MUX/utils"
 )
 
 var (
