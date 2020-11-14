@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/arijitnayak92/taskAfford/REST with MUX/utils"
+	"github.com/arijitnayak92/taskAfford/RESTMUX/cache"
+	"github.com/arijitnayak92/taskAfford/RESTMUX/utils"
+	"github.com/taskAfford/RESTMUX/domain"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -24,10 +26,36 @@ type itemInterface interface {
 
 func init() {
 	ItemDomain = &itemStruct{}
+	cache.InitializeRedis()
 }
 
 type itemStruct struct {
 	products []*Item
+}
+
+var lastNum int = 3
+
+func (c *itemStruct) Fibo(n int) (int, *utils.APIError) {
+	if n >= 0 {
+		if value, ok := cache.GetValue("FiboN", n); ok {
+			return value, nil
+		} else {
+			for i := lastNum; i <= n; i++ {
+				redis := new(domain.FiboStruct)
+				recent = cache.GetValue("FiboN", i-1) + cache.GetValue("FiboN", i-2)
+				redis.ForID = string(i)
+				redis.value = string(recent)
+				cache.SetValue("FiboN", redis)
+			}
+			lastNum = n
+			return localCache[n], nil
+		}
+	} else {
+		return -1, &utils.APIError{
+			Message:    "Product Id Should be unique !",
+			StatusCode: 406,
+		}
+	}
 }
 
 func (c *itemStruct) AddItem(newItem *Item) (*Item, *utils.APIError) {

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/arijitnayak92/taskAfford/REST with MUX/app"
+	"github.com/arijitnayak92/taskAfford/RESTMUX/app"
 )
 
 func main() {

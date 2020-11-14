@@ -6,3 +6,8 @@ type Item struct {
 	Price    uint64 `json:"price,omitempty" bson:"price,omitempty"`
 	Quantity uint64 `json:"quantity,omitempty" bson:"quantity,omitempty"`
 }
+
+type FiboStruct struct {
+	forID string
+	value string
+}

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/arijitnayak92/taskAfford/REST with MUX/controllers"
+	"github.com/arijitnayak92/taskAfford/RESTMUX/controllers"
 )
 
 func response(res http.ResponseWriter, req *http.Request) {
@@ -13,6 +13,7 @@ func response(res http.ResponseWriter, req *http.Request) {
 
 func Routes() {
 	router.HandleFunc("/", response)
+	router.HandleFunc("/getFibo/{number}", controllers.GetNthFibonacii).Methods("GET")
 	router.HandleFunc("/getOneItem/{item_id}", controllers.GetOneProduct).Methods("GET")
 	router.HandleFunc("/getAllItem", controllers.GetAllProduct).Methods("GET")
 	router.HandleFunc("/addItem", controllers.AddProduct).Methods("POST")

@@ -5,11 +5,26 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/arijitnayak92/taskAfford/REST with MUX/domain"
-	"github.com/arijitnayak92/taskAfford/REST with MUX/services"
-	"github.com/arijitnayak92/taskAfford/REST with MUX/utils"
+	"github.com/arijitnayak92/taskAfford/RESTMUX/domain"
+	"github.com/arijitnayak92/taskAfford/RESTMUX/services"
+	"github.com/arijitnayak92/taskAfford/RESTMUX/utils"
 	"github.com/gorilla/mux"
 )
+
+func GetNthFibonacii(res http.ResponseWriter, req *http.Request) {
+	res.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(req)
+	id := params["number"]
+	value, errors := services.ItemServicePublic.Fibonacii(id)
+	if errors != nil {
+		jsonValue, _ := json.Marshal(errors)
+		res.WriteHeader(errors.StatusCode)
+		res.Write(jsonValue)
+		return
+	}
+	jsonValue, _ := json.Marshal(item)
+	res.Write(jsonValue)
+}
 
 func GetOneProduct(res http.ResponseWriter, req *http.Request) {
 	res.Header().Set("Content-Type", "application/json")

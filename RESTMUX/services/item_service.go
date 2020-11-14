@@ -1,8 +1,8 @@
 package services
 
 import (
-	"github.com/arijitnayak92/taskAfford/REST with MUX/domain"
-	"github.com/arijitnayak92/taskAfford/REST with MUX/utils"
+	"github.com/arijitnayak92/taskAfford/RESTMUX/domain"
+	"github.com/arijitnayak92/taskAfford/RESTMUX/utils"
 )
 
 var (
@@ -22,6 +22,10 @@ func init() {
 }
 
 type itemServices struct{}
+
+func (c *itemServices) Fibonacii(number int64) (int64, *utils.APIError) {
+	return domain.ItemDomain.Fibo(number)
+}
 
 func (c *itemServices) AddItem(newItem *domain.Item) (*domain.Item, *utils.APIError) {
 	return domain.ItemDomain.AddItem(newItem)
