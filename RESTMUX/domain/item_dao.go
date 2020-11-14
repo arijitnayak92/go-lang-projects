@@ -6,7 +6,7 @@ import (
 
 	"github.com/arijitnayak92/taskAfford/RESTMUX/cache"
 	"github.com/arijitnayak92/taskAfford/RESTMUX/utils"
-	"github.com/taskAfford/RESTMUX/domain"
+
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -41,7 +41,7 @@ func (c *itemStruct) Fibo(n int) (int, *utils.APIError) {
 			return value, nil
 		} else {
 			for i := lastNum; i <= n; i++ {
-				redis := new(domain.FiboStruct)
+				redis := new(FiboStruct)
 				recent = cache.GetValue("FiboN", i-1) + cache.GetValue("FiboN", i-2)
 				redis.ForID = string(i)
 				redis.value = string(recent)
