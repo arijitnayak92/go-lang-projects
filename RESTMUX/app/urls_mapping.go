@@ -12,6 +12,7 @@ func response(res http.ResponseWriter, req *http.Request) {
 }
 
 func Routes() {
+
 	router.HandleFunc("/", response)
 	router.HandleFunc("/getFibo/{number}", controllers.GetNthFibonacii).Methods("GET")
 	router.HandleFunc("/getOneItem/{item_id}", controllers.GetOneProduct).Methods("GET")

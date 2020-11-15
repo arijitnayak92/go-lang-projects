@@ -15,6 +15,7 @@ type itemServicesInterface interface {
 	GetAllItem() ([]*domain.Item, *utils.APIError)
 	UpdateItem(itemID int64, newItem *domain.Item) (*domain.Item, *utils.APIError)
 	DeleteItem(itemID int64) (*domain.Item, *utils.APIError)
+	Fibonacii(number int) (int, *utils.APIError)
 }
 
 func init() {
@@ -23,7 +24,7 @@ func init() {
 
 type itemServices struct{}
 
-func (c *itemServices) Fibonacii(number int64) (int64, *utils.APIError) {
+func (c *itemServices) Fibonacii(number int) (int, *utils.APIError) {
 	return domain.ItemDomain.Fibo(number)
 }
 

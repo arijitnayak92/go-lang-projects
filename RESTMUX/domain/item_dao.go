@@ -3,6 +3,7 @@ package domain
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/arijitnayak92/taskAfford/RESTMUX/cache"
 	"github.com/arijitnayak92/taskAfford/RESTMUX/utils"
@@ -22,40 +23,66 @@ type itemInterface interface {
 	GetAll() ([]*Item, *utils.APIError)
 	UpdateItem(itemID int64, newItem *Item) (*Item, *utils.APIError)
 	DeleteItem(itemID int64) (*Item, *utils.APIError)
+	Fibo(n int) (int, *utils.APIError)
 }
 
 func init() {
 	ItemDomain = &itemStruct{}
 	cache.InitializeRedis()
+	cache.SetValue("0", "0")
+	cache.SetValue("1", "1")
+	cache.SetValue("2", "1")
 }
 
 type itemStruct struct {
 	products []*Item
 }
 
-var lastNum int = 3
+var lastNum = 3
 
 func (c *itemStruct) Fibo(n int) (int, *utils.APIError) {
 	if n >= 0 {
-		if value, ok := cache.GetValue("FiboN", n); ok {
-			return value, nil
-		} else {
-			for i := lastNum; i <= n; i++ {
-				redis := new(FiboStruct)
-				recent = cache.GetValue("FiboN", i-1) + cache.GetValue("FiboN", i-2)
-				redis.ForID = string(i)
-				redis.value = string(recent)
-				cache.SetValue("FiboN", redis)
+		if value, ok := cache.GetValue(fmt.Sprint(n)); ok {
+			sValue, err := strconv.Atoi(value)
+			if err != nil {
+				return -1, &utils.APIError{
+					Message:    "Operation Failed !",
+					StatusCode: 422,
+				}
 			}
-			lastNum = n
-			return localCache[n], nil
+			return sValue, nil
 		}
-	} else {
-		return -1, &utils.APIError{
-			Message:    "Product Id Should be unique !",
-			StatusCode: 406,
+		for i := lastNum; i <= n; i++ {
+			num1, err1 := cache.GetValue(fmt.Sprint(i - 1))
+			num2, err2 := cache.GetValue(fmt.Sprint(i - 2))
+			if !err1 || !err2 {
+				return -1, &utils.APIError{
+					Message:    "Operation Failed !",
+					StatusCode: 422,
+				}
+			}
+			num1Int, okD := strconv.Atoi(num1)
+			num2Int, okP := strconv.Atoi(num2)
+			if okD != nil || okP != nil {
+				return -1, &utils.APIError{
+					Message:    "Operation Failed !",
+					StatusCode: 422,
+				}
+			}
+			recent := num1Int + num2Int
+
+			cache.SetValue(fmt.Sprint(i), fmt.Sprint(recent))
 		}
+		lastNum = n
+		sendValue, _ := cache.GetValue(fmt.Sprint(n))
+		sValue, _ := strconv.Atoi(sendValue)
+		return sValue, nil
 	}
+	return -1, &utils.APIError{
+		Message:    "Product Id Should be unique !",
+		StatusCode: 406,
+	}
+
 }
 
 func (c *itemStruct) AddItem(newItem *Item) (*Item, *utils.APIError) {

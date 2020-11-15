@@ -15,14 +15,25 @@ func GetNthFibonacii(res http.ResponseWriter, req *http.Request) {
 	res.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(req)
 	id := params["number"]
-	value, errors := services.ItemServicePublic.Fibonacii(id)
+	intID, err := strconv.Atoi(id)
+	if err != nil {
+		apiError := &utils.APIError{
+			Message:    "User Id shoudl be a number !",
+			StatusCode: 400,
+		}
+		jsonValue, _ := json.Marshal(apiError)
+		res.WriteHeader(apiError.StatusCode)
+		res.Write(jsonValue)
+		return
+	}
+	value, errors := services.ItemServicePublic.Fibonacii(intID)
 	if errors != nil {
 		jsonValue, _ := json.Marshal(errors)
 		res.WriteHeader(errors.StatusCode)
 		res.Write(jsonValue)
 		return
 	}
-	jsonValue, _ := json.Marshal(item)
+	jsonValue, _ := json.Marshal(value)
 	res.Write(jsonValue)
 }
 
