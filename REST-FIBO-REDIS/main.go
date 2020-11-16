@@ -3,7 +3,6 @@ package main
 import "github.com/arijitnayak92/taskAfford/REST-FIBO-REDIS/cache"
 
 func main() {
-
 	cache.InitializeRedis()
 
 	println("Setting Testkey -> TestValue")
@@ -14,9 +13,9 @@ func main() {
 
 	if err == nil {
 		println("Value Returned : " + value.(string))
-	} else {
-		println("Getting Value Failed with error : " + err.Error())
 	}
+		println("Getting Value Failed with error : " + err.Error())
+
 
 }
 
