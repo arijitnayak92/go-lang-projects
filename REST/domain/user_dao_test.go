@@ -10,7 +10,7 @@ func TestGetUserNoUserFound(t *testing.T) {
 	//Initialization
 
 	//Execuation
-	user, err := UserMethods.GetUser(0)
+	user, err := UserMethods.Login(0)
 	//Validation
 	assert.Nil(t, user, "Don't want a user with id 0")
 	assert.NotNil(t, err)
@@ -22,7 +22,7 @@ func TestGetUserNoError(t *testing.T) {
 	//Initialization
 
 	//Execuation
-	user, err := UserMethods.GetUser(123)
+	user, err := UserMethods.Login(123)
 	//Validation
 	assert.Nil(t, err)
 	assert.NotNil(t, user)
