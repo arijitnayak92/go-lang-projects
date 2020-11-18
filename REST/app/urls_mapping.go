@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/arijitnayak92/taskAfford/REST/auth"
 	"github.com/arijitnayak92/taskAfford/REST/controllers"
 	"github.com/gin-gonic/gin"
 )
@@ -11,10 +12,12 @@ func response(c *gin.Context) {
 
 func Routes() {
 	router.GET("/", response)
-	router.GET("/users", controllers.GetUser)
-	router.GET("/getOneItem/:item_id", controllers.GetOneProduct)
-	router.GET("/getAllItem", controllers.GetAllProduct)
-	router.POST("/addItem", controllers.AddProduct)
-	router.PUT("/updateItem/:item_id", controllers.UpdateOneProduct)
-	router.DELETE("/deleteItem/:item_id", controllers.DeleteOneProduct)
+	router.POST("/login", controllers.Login)
+	router.POST("/create", controllers.CreateUser)
+	router.POST("/refreshToken", controllers.RefreshToken)
+	router.GET("/getOneItem/:item_id", auth.TokenAuthMiddleware(), controllers.GetOneProduct)
+	router.GET("/getAllItem", auth.TokenAuthMiddleware(), controllers.GetAllProduct)
+	router.POST("/addItem", auth.TokenAuthMiddleware(), controllers.AddProduct)
+	router.PUT("/updateItem/:item_id", auth.TokenAuthMiddleware(), controllers.UpdateOneProduct)
+	router.DELETE("/deleteItem/:item_id", auth.TokenAuthMiddleware(), controllers.DeleteOneProduct)
 }

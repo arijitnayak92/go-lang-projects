@@ -3,6 +3,7 @@ package services
 import (
 	"github.com/arijitnayak92/taskAfford/REST/domain"
 	"github.com/arijitnayak92/taskAfford/REST/utils"
+	"github.com/gin-gonic/gin"
 )
 
 var (
@@ -10,7 +11,10 @@ var (
 )
 
 type userServiceIntrface interface {
-	GetUser(userId int64) (*domain.User, *utils.APIError)
+	Login(u *domain.User) (map[string]string, *utils.APIError)
+	CreateUser(user *domain.User) (*domain.User, *utils.APIError)
+	RefreshToken(c *gin.Context) (map[string]string, *utils.APIError)
+	Logout(c *gin.Context) (int, *utils.APIError)
 }
 
 func init() {
@@ -19,6 +23,18 @@ func init() {
 
 type usersServices struct{}
 
-func (u *usersServices) GetUser(userId int64) (*domain.User, *utils.APIError) {
-	return domain.UserMethods.GetUser(userId)
+func (u *usersServices) Login(user *domain.User) (map[string]string, *utils.APIError) {
+	return domain.UserMethods.Login(user)
+}
+
+func (u *usersServices) CreateUser(user *domain.User) (*domain.User, *utils.APIError) {
+	return domain.UserMethods.CreateUser(user)
+}
+
+func (u *usersServices) RefreshToken(c *gin.Context) (map[string]string, *utils.APIError) {
+	return domain.UserMethods.Refresh(c)
+}
+
+func (u *usersServices) Logout(c *gin.Context) (int, *utils.APIError) {
+	return domain.UserMethods.Logout(c)
 }

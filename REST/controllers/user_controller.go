@@ -1,31 +1,60 @@
 package controllers
 
 import (
-	"strconv"
+	"fmt"
+	"net/http"
 
+	"github.com/arijitnayak92/taskAfford/REST/domain"
 	"github.com/arijitnayak92/taskAfford/REST/services"
-	"github.com/arijitnayak92/taskAfford/REST/utils"
 	"github.com/gin-gonic/gin"
 )
 
-func GetUser(c *gin.Context) {
-	userId, err := strconv.ParseInt(c.Query("user_id"), 10, 64)
-	if err != nil {
-		apiError := &utils.APIError{
-			Message:    "User Id shoudl be a number !",
-			StatusCode: 400,
-		}
-		c.JSON(apiError.StatusCode, apiError)
-		// jsonValue, _ := json.Marshal(apiError)
-		// res.WriteHeader(apiError.StatusCode)
-		// res.Write(jsonValue)
+func CreateUser(c *gin.Context) {
+	fmt.Println(c.Request.Header.Get("Authorization"))
+	var u *domain.User
+	if err := c.ShouldBindJSON(&u); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, "Invalid json provided")
 		return
 	}
-	user, apiError := services.UserService.GetUser(userId)
+	fmt.Println(u)
+	if u.Username == "" || u.Password == "" {
+		c.JSON(406, "Enter all the details !")
+	}
+
+	user, apiError := services.UserService.CreateUser(u)
 	if apiError != nil {
-		// jsonValue, _ := json.Marshal(apiError)
-		// res.WriteHeader(apiError.StatusCode)
-		// res.Write(jsonValue)
+		c.JSON(apiError.StatusCode, apiError)
+		return
+	}
+	// jsonValue, _ := json.Marshal(user)
+	c.JSON(200, user)
+	//res.Write(200,user)
+}
+
+func Login(c *gin.Context) {
+	var u *domain.User
+	if err := c.ShouldBindJSON(&u); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, "Invalid json provided")
+		return
+	}
+	fmt.Println(u)
+	if u.Username == "" || u.Password == "" {
+		c.JSON(406, "Enter all the details !")
+	}
+
+	user, apiError := services.UserService.Login(u)
+	if apiError != nil {
+		c.JSON(apiError.StatusCode, apiError)
+		return
+	}
+	// jsonValue, _ := json.Marshal(user)
+	c.JSON(200, user)
+	//res.Write(200,user)
+}
+
+func RefreshToken(c *gin.Context) {
+	user, apiError := services.UserService.RefreshToken(c)
+	if apiError != nil {
 		c.JSON(apiError.StatusCode, apiError)
 		return
 	}
