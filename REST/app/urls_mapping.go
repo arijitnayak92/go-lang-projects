@@ -13,6 +13,7 @@ func response(c *gin.Context) {
 func Routes() {
 	router.GET("/", response)
 	router.POST("/login", controllers.Login)
+	router.POST("/logout", controllers.Logout)
 	router.POST("/create", controllers.CreateUser)
 	router.POST("/refreshToken", controllers.RefreshToken)
 	router.GET("/getOneItem/:item_id", auth.TokenAuthMiddleware(), controllers.GetOneProduct)

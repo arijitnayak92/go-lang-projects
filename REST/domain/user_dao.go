@@ -129,7 +129,7 @@ func (t *usersStruct)CreateToken(userid uint64) (*TokenDetails,*utils.APIError) 
 	td.RefreshUuid = td.AccessUuid + "++" + strconv.Itoa(int(userid))
 	var err error
 	//Creating Access Token
-	os.Setenv("ACCESS_SECRET", "jdnfksdmfksd") //this should be in an env file
+	os.Setenv("ACCESS_SECRET", "jdnfksdmfksd")
 	atClaims := jwt.MapClaims{}
 	atClaims["authorized"] = true
 	atClaims["access_uuid"] = td.AccessUuid
@@ -144,7 +144,7 @@ func (t *usersStruct)CreateToken(userid uint64) (*TokenDetails,*utils.APIError) 
 		}
 	}
 	//Creating Refresh Token
-	os.Setenv("REFRESH_SECRET", "mcmvmkmsdnfsdmfdsjf") //this should be in an env file
+	os.Setenv("REFRESH_SECRET", "mcmvmkmsdnfsdmfdsjf")
 	rtClaims := jwt.MapClaims{}
 	rtClaims["refresh_uuid"] = td.RefreshUuid
 	rtClaims["user_id"] = userid
@@ -161,7 +161,7 @@ func (t *usersStruct)CreateToken(userid uint64) (*TokenDetails,*utils.APIError) 
 }
 
 func (t *usersStruct)CreateAuth(userid uint64, td *TokenDetails) *utils.APIError {
-	at := time.Unix(td.AtExpires, 0) //converting Unix to UTC(to Time object)
+	at := time.Unix(td.AtExpires, 0)
 	rt := time.Unix(td.RtExpires, 0)
 	now := time.Now()
 
@@ -187,8 +187,7 @@ func (t *usersStruct)ExtractToken(r *http.Request) string {
 	return bearToken
 }
 
-// Parse, validate, and return a token.
-// keyFunc will receive the parsed token and should return the key for validating.
+// this function will receive the parsed token and should return the key for validating.
 func (t *usersStruct)VerifyToken(r *http.Request) (*jwt.Token, *utils.APIError) {
 	tokenString := UserMethods.ExtractToken(r)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -317,7 +316,7 @@ func (t *usersStruct)Refresh(c *gin.Context) (map[string]string,*utils.APIError)
 		}
 		return []byte(os.Getenv("REFRESH_SECRET")), nil
 	})
-	//if there is an error, the token must have expired
+
 	if err != nil {
 		return	nil,&utils.APIError{
 				Message:    "Refresh token expired !",
@@ -334,7 +333,7 @@ func (t *usersStruct)Refresh(c *gin.Context) (map[string]string,*utils.APIError)
 	//Since token is valid, get the uuid:
 	claims, ok := token.Claims.(jwt.MapClaims) //the token claims should conform to MapClaims
 	if ok && token.Valid {
-		refreshUuid, ok := claims["refresh_uuid"].(string) //convert the interface to string
+		refreshUuid, ok := claims["refresh_uuid"].(string)
 		if !ok {
 			return	nil,&utils.APIError{
 					Message:    "Unable to process data !",
@@ -350,7 +349,7 @@ func (t *usersStruct)Refresh(c *gin.Context) (map[string]string,*utils.APIError)
 		}
 		//Delete the previous Refresh Token
 		deleted, delErr :=  UserMethods.DeleteAuth(refreshUuid)
-		if delErr != nil || deleted == 0 { //if any goes wrong
+		if delErr != nil || deleted == 0 {
 			return	nil,&utils.APIError{
 					Message:    "Unauthorized !",
 					StatusCode: 401,
@@ -410,7 +409,7 @@ func  DeleteTokens(authD *AccessDetails) error {
 	if err != nil {
 		return err
 	}
-	//When the record is deleted, the return value is 1
+
 	if deletedAt != 1 || deletedRt != 1 {
 		return errors.New("something went wrong")
 	}

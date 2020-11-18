@@ -53,12 +53,23 @@ func Login(c *gin.Context) {
 }
 
 func RefreshToken(c *gin.Context) {
-	user, apiError := services.UserService.RefreshToken(c)
+	token, apiError := services.UserService.RefreshToken(c)
 	if apiError != nil {
 		c.JSON(apiError.StatusCode, apiError)
 		return
 	}
 	// jsonValue, _ := json.Marshal(user)
-	c.JSON(200, user)
+	c.JSON(200, token)
+	//res.Write(200,user)
+}
+
+func Logout(c *gin.Context) {
+	_, apiError := services.UserService.Logout(c)
+	if apiError != nil {
+		c.JSON(apiError.StatusCode, apiError)
+		return
+	}
+	// jsonValue, _ := json.Marshal(user)
+	c.JSON(200, "Successfully Logged Out !")
 	//res.Write(200,user)
 }
