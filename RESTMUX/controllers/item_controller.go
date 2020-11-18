@@ -11,7 +11,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func GetNthFibonacii(res http.ResponseWriter, req *http.Request) {
+func GetNthFibonacii(res http.ResponseWriter, req *http.Request) { //Getting Nth Fibo
 	res.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(req)
 	id := params["number"]

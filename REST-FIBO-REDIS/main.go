@@ -1,10 +1,13 @@
 package main
 
-import "github.com/arijitnayak92/taskAfford/REST-FIBO-REDIS/cache"
+import (
+	"fmt"
+	"github.com/arijitnayak92/taskAfford/REST-FIBO-REDIS/cache"
+)
 
 func main() {
 	cache.InitializeRedis()
-
+	fmt.Print("me")
 	println("Setting Testkey -> TestValue")
 	cache.SetValue("TestKey", "TestValue")
 
