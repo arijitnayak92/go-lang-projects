@@ -3,17 +3,15 @@ package app
 import (
 	"log"
 
-	"github.com/gin-gonic/gin"
+	"net/http"
+
+	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
 
-var (
-	router *gin.Engine
-)
+var router = mux.NewRouter().StrictSlash(true)
 
 func init() {
-	gin.SetMode(gin.ReleaseMode)
-	router = gin.Default()
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatalf("Error loading .env file")
@@ -22,8 +20,5 @@ func init() {
 
 func StartApp() {
 	Routes()
-	err := router.Run(":8080")
-	if err != nil {
-		panic(err)
-	}
+	http.ListenAndServe(":8080", router)
 }

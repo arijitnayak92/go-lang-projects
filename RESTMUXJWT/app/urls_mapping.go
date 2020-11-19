@@ -1,24 +1,26 @@
 package app
 
 import (
-	"github.com/arijitnayak92/taskAfford/RESTMUXJWT/auth"
+	"fmt"
+	"net/http"
+
 	"github.com/arijitnayak92/taskAfford/RESTMUXJWT/controllers"
-	"github.com/gin-gonic/gin"
 )
 
-func response(c *gin.Context) {
-	c.JSON(200, "Backend Connected !")
+func response(res http.ResponseWriter, req *http.Request) {
+	fmt.Fprintf(res, "Backend Responding !")
 }
 
 func Routes() {
-	router.GET("/", response)
-	router.POST("/login", controllers.Login)
-	router.POST("/logout", controllers.Logout)
-	router.POST("/create", controllers.CreateUser)
-	router.POST("/refreshToken", controllers.RefreshToken)
-	router.GET("/getOneItem/:item_id", auth.TokenAuthMiddleware(), controllers.GetOneProduct)
-	router.GET("/getAllItem", auth.TokenAuthMiddleware(), controllers.GetAllProduct)
-	router.POST("/addItem", auth.TokenAuthMiddleware(), controllers.AddProduct)
-	router.PUT("/updateItem/:item_id", auth.TokenAuthMiddleware(), controllers.UpdateOneProduct)
-	router.DELETE("/deleteItem/:item_id", auth.TokenAuthMiddleware(), controllers.DeleteOneProduct)
+	router.HandleFunc("/", response)
+	router.HandleFunc("/login", controllers.Login).Methods("POST")
+	router.HandleFunc("/logout", controllers.Logout).Methods("POST")
+	router.HandleFunc("/create", controllers.CreateUser).Methods("POST")
+	router.HandleFunc("/refreshToken", controllers.RefreshToken).Methods("POST")
+	router.HandleFunc("/getOneItem/{item_id}", controllers.GetOneProduct).Methods("GET")
+	router.HandleFunc("/getAllItem", controllers.GetAllProduct).Methods("GET")
+	router.HandleFunc("/addItem", controllers.AddProduct).Methods("POST")
+	router.HandleFunc("/updateItem/{item_id}", controllers.UpdateOneProduct).Methods("PUT")
+	router.HandleFunc("/deleteItem/{item_id}", controllers.DeleteOneProduct).Methods("DELETE")
+
 }

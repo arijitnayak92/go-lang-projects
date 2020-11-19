@@ -1,75 +1,108 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"github.com/arijitnayak92/taskAfford/RESTMUXJWT/domain"
 	"github.com/arijitnayak92/taskAfford/RESTMUXJWT/services"
-	"github.com/gin-gonic/gin"
+	"github.com/arijitnayak92/taskAfford/RESTMUXJWT/utils"
 )
 
-func CreateUser(c *gin.Context) {
-	fmt.Println(c.Request.Header.Get("Authorization"))
+func CreateUser(res http.ResponseWriter, req *http.Request) {
+	res.Header().Set("Content-Type", "application/json")
 	var u *domain.User
-	if err := c.ShouldBindJSON(&u); err != nil {
-		c.JSON(http.StatusUnprocessableEntity, "Invalid json provided")
+	if err := json.NewDecoder(req.Body).Decode(&u); err != nil {
+		apiError := &utils.APIError{
+			Message:    "Invalid token provided !",
+			StatusCode: 422,
+		}
+		jsonValue, _ := json.Marshal(apiError)
+		res.WriteHeader(apiError.StatusCode)
+		res.Write(jsonValue)
 		return
 	}
 	fmt.Println(u)
 	if u.Username == "" || u.Password == "" {
-		c.JSON(406, "Enter all the details !")
+		apiError := &utils.APIError{
+			Message:    "Enter all the details !",
+			StatusCode: 406,
+		}
+		jsonValue, _ := json.Marshal(apiError)
+		res.WriteHeader(apiError.StatusCode)
+		res.Write(jsonValue)
+		return
 	}
 
 	user, apiError := services.UserService.CreateUser(u)
 	if apiError != nil {
-		c.JSON(apiError.StatusCode, apiError)
+		jsonValue, _ := json.Marshal(apiError)
+		res.WriteHeader(apiError.StatusCode)
+		res.Write(jsonValue)
 		return
 	}
-	// jsonValue, _ := json.Marshal(user)
-	c.JSON(200, user)
-	//res.Write(200,user)
+	jsonValue, _ := json.Marshal(user)
+	res.WriteHeader(200)
+	res.Write(jsonValue)
 }
 
-func Login(c *gin.Context) {
+func Login(res http.ResponseWriter, req *http.Request) {
 	var u *domain.User
-	if err := c.ShouldBindJSON(&u); err != nil {
-		c.JSON(http.StatusUnprocessableEntity, "Invalid json provided")
+	if err := json.NewDecoder(req.Body).Decode(&u); err != nil {
+		apiError := &utils.APIError{
+			Message:    "Invalid user data !",
+			StatusCode: 422,
+		}
+		jsonValue, _ := json.Marshal(apiError)
+		res.WriteHeader(apiError.StatusCode)
+		res.Write(jsonValue)
 		return
 	}
-	fmt.Println(u)
 	if u.Username == "" || u.Password == "" {
-		c.JSON(406, "Enter all the details !")
+		apiError := &utils.APIError{
+			Message:    "Enter all the details !",
+			StatusCode: 406,
+		}
+		jsonValue, _ := json.Marshal(apiError)
+		res.WriteHeader(apiError.StatusCode)
+		res.Write(jsonValue)
+		return
 	}
 
 	user, apiError := services.UserService.Login(u)
 	if apiError != nil {
-		c.JSON(apiError.StatusCode, apiError)
+		jsonValue, _ := json.Marshal(apiError)
+		res.WriteHeader(apiError.StatusCode)
+		res.Write(jsonValue)
 		return
 	}
-	// jsonValue, _ := json.Marshal(user)
-	c.JSON(200, user)
-	//res.Write(200,user)
+	jsonValue, _ := json.Marshal(user)
+	res.WriteHeader(200)
+	res.Write(jsonValue)
 }
 
-func RefreshToken(c *gin.Context) {
-	token, apiError := services.UserService.RefreshToken(c)
+func RefreshToken(res http.ResponseWriter, req *http.Request) {
+	token, apiError := services.UserService.RefreshToken(req)
 	if apiError != nil {
-		c.JSON(apiError.StatusCode, apiError)
+		jsonValue, _ := json.Marshal(apiError)
+		res.WriteHeader(apiError.StatusCode)
+		res.Write(jsonValue)
 		return
 	}
-	// jsonValue, _ := json.Marshal(user)
-	c.JSON(200, token)
-	//res.Write(200,user)
+	jsonValue, _ := json.Marshal(token)
+	res.WriteHeader(200)
+	res.Write(jsonValue)
 }
 
-func Logout(c *gin.Context) {
-	_, apiError := services.UserService.Logout(c)
+func Logout(res http.ResponseWriter, req *http.Request) {
+	_, apiError := services.UserService.Logout(req)
 	if apiError != nil {
-		c.JSON(apiError.StatusCode, apiError)
+		jsonValue, _ := json.Marshal(apiError)
+		res.WriteHeader(apiError.StatusCode)
+		res.Write(jsonValue)
 		return
 	}
-	// jsonValue, _ := json.Marshal(user)
-	c.JSON(200, "Successfully Logged Out !")
-	//res.Write(200,user)
+	res.WriteHeader(200)
+	res.Write([]byte("Successfully Loggedout !"))
 }

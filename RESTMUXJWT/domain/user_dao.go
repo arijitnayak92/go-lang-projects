@@ -1,24 +1,25 @@
 package domain
 
 import (
-	"github.com/arijitnayak92/taskAfford/RESTMUXJWT/utils"
+	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
-	"errors"
-	"go.mongodb.org/mongo-driver/bson"
-	"context"
+
+	"github.com/arijitnayak92/taskAfford/RESTMUXJWT/utils"
 	"github.com/dgrijalva/jwt-go"
-"github.com/go-redis/redis/v7"
+	"github.com/go-redis/redis/v7"
 	"github.com/twinj/uuid"
+	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/bcrypt"
-	"github.com/gin-gonic/gin"
 )
 
 var (
-	client *redis.Client
+	client      *redis.Client
 	UserMethods userInterface
 )
 
@@ -47,53 +48,53 @@ type userInterface interface {
 	ExtractToken(r *http.Request) string
 	VerifyToken(r *http.Request) (*jwt.Token, *utils.APIError)
 	TokenValid(r *http.Request) *utils.APIError
-	FetchAuth(authD *AccessDetails) (uint64,*utils.APIError)
-	FetchUserID(*gin.Context) (uint64,*utils.APIError)
-	ExtractTokenMetadata(*http.Request) (*AccessDetails,*utils.APIError)
-	Refresh(*gin.Context) (map[string]string,*utils.APIError)
-	DeleteAuth(givenUUID string) (int64,*utils.APIError)
-	Logout(c *gin.Context) (int,*utils.APIError)
+	FetchAuth(authD *AccessDetails) (uint64, *utils.APIError)
+	FetchUserID(req *http.Request) (uint64, *utils.APIError)
+	ExtractTokenMetadata(*http.Request) (*AccessDetails, *utils.APIError)
+	Refresh(req *http.Request) (map[string]string, *utils.APIError)
+	DeleteAuth(givenUUID string) (int64, *utils.APIError)
+	Logout(req *http.Request) (int, *utils.APIError)
 }
 
 type usersStruct struct{}
 
-
 func (c *usersStruct) CreateUser(userDATA *User) (*User, *utils.APIError) {
-   var user *User
-	  userCollection.FindOne(context.TODO(), bson.M{"username": userDATA.Username}).Decode(&user);
-	 if user!=nil {
-		 return nil, &utils.APIError{
-			 Message:    "User already present !",
-			 StatusCode: 422,
-		 }
-	 }
-	 bytes,errs:= bcrypt.GenerateFromPassword([]byte(userDATA.Password), 14)
-	 if errs !=nil {
-		 return nil, &utils.APIError{
-			 Message:    "Something went wrong !",
-			 StatusCode: 422,
-		 }
-	 }
-	 userDATA.Password = string(bytes)
-	 _, err := userCollection.InsertOne(context.TODO(),userDATA)
-	 if err != nil {
-		 return nil, &utils.APIError{
-			 Message:    "Something went wrong !",
-			 StatusCode: 422,
-		 }
-	 }
-	 return userDATA,nil
+	var user *User
+	userCollection.FindOne(context.TODO(), bson.M{"username": userDATA.Username}).Decode(&user)
+	if user != nil {
+		return nil, &utils.APIError{
+			Message:    "User already present !",
+			StatusCode: 422,
+		}
+	}
+
+	bytes, errs := bcrypt.GenerateFromPassword([]byte(userDATA.Password), 14)
+	if errs != nil {
+		return nil, &utils.APIError{
+			Message:    "Something went wrong !",
+			StatusCode: 422,
+		}
+	}
+	userDATA.Password = string(bytes)
+	_, err := userCollection.InsertOne(context.TODO(), userDATA)
+	if err != nil {
+		return nil, &utils.APIError{
+			Message:    "Something went wrong !",
+			StatusCode: 422,
+		}
+	}
+	return userDATA, nil
 }
 
 func (c *usersStruct) Login(userDATA *User) (map[string]string, *utils.APIError) {
-  var user *User
+	var user *User
 	if err := userCollection.FindOne(context.TODO(), bson.M{"username": userDATA.Username}).Decode(&user); err != nil {
 		return nil, &utils.APIError{
 			Message:    "User Not Found !",
 			StatusCode: 401,
 		}
 	}
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(userDATA.Password)); err !=nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(userDATA.Password)); err != nil {
 		return nil, &utils.APIError{
 			Message:    "Wrong Password !",
 			StatusCode: 401,
@@ -117,10 +118,10 @@ func (c *usersStruct) Login(userDATA *User) (map[string]string, *utils.APIError)
 		"access_token":  ts.AccessToken,
 		"refresh_token": ts.RefreshToken,
 	}
-	return tokens,nil
+	return tokens, nil
 }
 
-func (t *usersStruct)CreateToken(userid uint64) (*TokenDetails,*utils.APIError) {
+func (t *usersStruct) CreateToken(userid uint64) (*TokenDetails, *utils.APIError) {
 	td := &TokenDetails{}
 	td.AtExpires = time.Now().Add(time.Minute * 15).Unix()
 	td.AccessUuid = uuid.NewV4().String()
@@ -160,7 +161,7 @@ func (t *usersStruct)CreateToken(userid uint64) (*TokenDetails,*utils.APIError) 
 	return td, nil
 }
 
-func (t *usersStruct)CreateAuth(userid uint64, td *TokenDetails) *utils.APIError {
+func (t *usersStruct) CreateAuth(userid uint64, td *TokenDetails) *utils.APIError {
 	at := time.Unix(td.AtExpires, 0)
 	rt := time.Unix(td.RtExpires, 0)
 	now := time.Now()
@@ -182,13 +183,13 @@ func (t *usersStruct)CreateAuth(userid uint64, td *TokenDetails) *utils.APIError
 	return nil
 }
 
-func (t *usersStruct)ExtractToken(r *http.Request) string {
+func (t *usersStruct) ExtractToken(r *http.Request) string {
 	bearToken := r.Header.Get("Authorization")
 	return bearToken
 }
 
 // this function will receive the parsed token and should return the key for validating.
-func (t *usersStruct)VerifyToken(r *http.Request) (*jwt.Token, *utils.APIError) {
+func (t *usersStruct) VerifyToken(r *http.Request) (*jwt.Token, *utils.APIError) {
 	tokenString := UserMethods.ExtractToken(r)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -197,7 +198,7 @@ func (t *usersStruct)VerifyToken(r *http.Request) (*jwt.Token, *utils.APIError) 
 		return []byte(os.Getenv("ACCESS_SECRET")), nil
 	})
 	if err != nil {
-		return nil,&utils.APIError{
+		return nil, &utils.APIError{
 			Message:    "Something went wrong !",
 			StatusCode: 422,
 		}
@@ -205,7 +206,7 @@ func (t *usersStruct)VerifyToken(r *http.Request) (*jwt.Token, *utils.APIError) 
 	return token, nil
 }
 
-func (t *usersStruct)TokenValid(r *http.Request) *utils.APIError {
+func (t *usersStruct) TokenValid(r *http.Request) *utils.APIError {
 	token, err := UserMethods.VerifyToken(r)
 	if err != nil {
 		return &utils.APIError{
@@ -222,30 +223,29 @@ func (t *usersStruct)TokenValid(r *http.Request) *utils.APIError {
 	return nil
 }
 
-func (t *usersStruct)FetchUserID(c *gin.Context) (uint64,*utils.APIError){
-	//Extract the access token metadata 
-	metadata, err := UserMethods.ExtractTokenMetadata(c.Request)
+func (t *usersStruct) FetchUserID(req *http.Request) (uint64, *utils.APIError) {
+	//Extract the access token metadata
+	metadata, err := UserMethods.ExtractTokenMetadata(req)
 	if err != nil {
-		return 0,&utils.APIError{
+		return 0, &utils.APIError{
 			Message:    "UnAuthorized  !",
 			StatusCode: 401,
 		}
 	}
 	userid, err := UserMethods.FetchAuth(metadata)
 	if err != nil {
-		return 0,&utils.APIError{
+		return 0, &utils.APIError{
 			Message:    "UnAuthorized  !",
 			StatusCode: 401,
 		}
 	}
-	return userid,nil
+	return userid, nil
 }
 
-
-func (t *usersStruct)ExtractTokenMetadata(r *http.Request) (*AccessDetails,*utils.APIError) {
+func (t *usersStruct) ExtractTokenMetadata(r *http.Request) (*AccessDetails, *utils.APIError) {
 	token, err := UserMethods.VerifyToken(r)
 	if err != nil {
-		return nil,&utils.APIError{
+		return nil, &utils.APIError{
 			Message:    "Invalid Token  !",
 			StatusCode: 401,
 		}
@@ -254,32 +254,30 @@ func (t *usersStruct)ExtractTokenMetadata(r *http.Request) (*AccessDetails,*util
 	if ok && token.Valid {
 		accessUuid, ok := claims["access_uuid"].(string)
 		if !ok {
-			return nil,&utils.APIError{
+			return nil, &utils.APIError{
 				Message:    "UnAuthorized  !",
 				StatusCode: 401,
 			}
 		}
 		userId, err := strconv.ParseUint(fmt.Sprintf("%.f", claims["user_id"]), 10, 64)
 		if err != nil {
-			return nil,&utils.APIError{
+			return nil, &utils.APIError{
 				Message:    "Something went wrong  !",
 				StatusCode: 422,
 			}
 		}
 		return &AccessDetails{
 			AccessUuid: accessUuid,
-			UserId:   userId,
+			UserId:     userId,
 		}, nil
 	}
-	return nil,&utils.APIError{
+	return nil, &utils.APIError{
 		Message:    "Something went wrong  !",
 		StatusCode: 422,
 	}
 }
 
-
-
-func (t *usersStruct)FetchAuth(authD *AccessDetails) (uint64,*utils.APIError) {
+func (t *usersStruct) FetchAuth(authD *AccessDetails) (uint64, *utils.APIError) {
 	userid, err := client.Get(authD.AccessUuid).Result()
 	if err != nil {
 		return 0, &utils.APIError{
@@ -289,7 +287,7 @@ func (t *usersStruct)FetchAuth(authD *AccessDetails) (uint64,*utils.APIError) {
 	}
 	userID, _ := strconv.ParseUint(userid, 10, 64)
 	if authD.UserId != userID {
-		return 0,&utils.APIError{
+		return 0, &utils.APIError{
 			Message:    "Unauthorized Action !",
 			StatusCode: 403,
 		}
@@ -297,11 +295,10 @@ func (t *usersStruct)FetchAuth(authD *AccessDetails) (uint64,*utils.APIError) {
 	return userID, nil
 }
 
-
-func (t *usersStruct)Refresh(c *gin.Context) (map[string]string,*utils.APIError) {
+func (t *usersStruct) Refresh(req *http.Request) (map[string]string, *utils.APIError) {
 	mapToken := map[string]string{}
-	if err := c.ShouldBindJSON(&mapToken); err != nil {
-	return	nil,&utils.APIError{
+	if err := json.NewDecoder(req.Body).Decode(&mapToken); err != nil {
+		return nil, &utils.APIError{
 			Message:    "JSON converting error !",
 			StatusCode: 422,
 		}
@@ -318,58 +315,58 @@ func (t *usersStruct)Refresh(c *gin.Context) (map[string]string,*utils.APIError)
 	})
 
 	if err != nil {
-		return	nil,&utils.APIError{
-				Message:    "Refresh token expired !",
-				StatusCode: 401,
-			}
+		return nil, &utils.APIError{
+			Message:    "Refresh token expired !",
+			StatusCode: 401,
+		}
 	}
 	//is token valid?
 	if _, ok := token.Claims.(jwt.Claims); !ok && !token.Valid {
-		return	nil,&utils.APIError{
-				Message:    "Unauthorized !",
-				StatusCode: 401,
-			}
+		return nil, &utils.APIError{
+			Message:    "Unauthorized !",
+			StatusCode: 401,
+		}
 	}
 	//Since token is valid, get the uuid:
 	claims, ok := token.Claims.(jwt.MapClaims) //the token claims should conform to MapClaims
 	if ok && token.Valid {
 		refreshUuid, ok := claims["refresh_uuid"].(string)
 		if !ok {
-			return	nil,&utils.APIError{
-					Message:    "Unable to process data !",
-					StatusCode: 422,
-				}
+			return nil, &utils.APIError{
+				Message:    "Unable to process data !",
+				StatusCode: 422,
+			}
 		}
 		userId, err := strconv.ParseUint(fmt.Sprintf("%.f", claims["user_id"]), 10, 64)
 		if err != nil {
-			return	nil,&utils.APIError{
-					Message:    "Some error occoured !",
-					StatusCode: 422,
-				}
+			return nil, &utils.APIError{
+				Message:    "Some error occoured !",
+				StatusCode: 422,
+			}
 		}
 		//Delete the previous Refresh Token
-		deleted, delErr :=  UserMethods.DeleteAuth(refreshUuid)
+		deleted, delErr := UserMethods.DeleteAuth(refreshUuid)
 		if delErr != nil || deleted == 0 {
-			return	nil,&utils.APIError{
-					Message:    "Unauthorized !",
-					StatusCode: 401,
-				}
+			return nil, &utils.APIError{
+				Message:    "Unauthorized !",
+				StatusCode: 401,
+			}
 		}
 		//Create new pairs of refresh and access tokens
-		ts, createErr :=  UserMethods.CreateToken(userId)
-		if  createErr != nil {
-			return	nil,&utils.APIError{
-					Message:    "Denied !",
-					StatusCode: 403,
-				}
+		ts, createErr := UserMethods.CreateToken(userId)
+		if createErr != nil {
+			return nil, &utils.APIError{
+				Message:    "Denied !",
+				StatusCode: 403,
+			}
 		}
 		//save the tokens metadata to redis
-		saveErr :=  UserMethods.CreateAuth(userId, ts)
+		saveErr := UserMethods.CreateAuth(userId, ts)
 		if saveErr != nil {
-			return	nil,&utils.APIError{
-					Message:    "Denied !",
-					StatusCode: 403,
-				}
+			return nil, &utils.APIError{
+				Message:    "Denied !",
+				StatusCode: 403,
+			}
 		}
 		tokens := map[string]string{
 			"access_token":  ts.AccessToken,
@@ -377,26 +374,25 @@ func (t *usersStruct)Refresh(c *gin.Context) (map[string]string,*utils.APIError)
 		}
 		return tokens, nil
 	} else {
-		return	nil,&utils.APIError{
-				Message:    "Unauthorized !",
-				StatusCode: 401,
-			}
+		return nil, &utils.APIError{
+			Message:    "Unauthorized !",
+			StatusCode: 401,
+		}
 	}
 }
 
-
-func (t *usersStruct)DeleteAuth(givenUUID string) (int64,*utils.APIError) {
+func (t *usersStruct) DeleteAuth(givenUUID string) (int64, *utils.APIError) {
 	deleted, err := client.Del(givenUUID).Result()
 	if err != nil {
-		return 0,&utils.APIError{
-				Message:    "Error Occoured !",
-				StatusCode: 422,
-			}
+		return 0, &utils.APIError{
+			Message:    "Error Occoured !",
+			StatusCode: 422,
+		}
 	}
 	return deleted, nil
 }
 
-func  DeleteTokens(authD *AccessDetails) error {
+func DeleteTokens(authD *AccessDetails) error {
 	//get the refresh uuid
 	refreshUuid := fmt.Sprintf("%s++%d", authD.AccessUuid, authD.UserId)
 	//delete access token
@@ -416,20 +412,20 @@ func  DeleteTokens(authD *AccessDetails) error {
 	return nil
 }
 
-func (t *usersStruct)Logout(c *gin.Context) (int,*utils.APIError) {
-	metadata, err := UserMethods.ExtractTokenMetadata(c.Request)
+func (t *usersStruct) Logout(req *http.Request) (int, *utils.APIError) {
+	metadata, err := UserMethods.ExtractTokenMetadata(req)
 	if err != nil {
-		return 0,&utils.APIError{
-				Message:    "Unauthorized !",
-				StatusCode: 401,
-			}
+		return 0, &utils.APIError{
+			Message:    "Unauthorized !",
+			StatusCode: 401,
+		}
 	}
 	delErr := DeleteTokens(metadata)
 	if delErr != nil {
-		return 0,&utils.APIError{
-				Message:    "Unauthorized !",
-				StatusCode: 401,
-			}
+		return 0, &utils.APIError{
+			Message:    "Unauthorized !",
+			StatusCode: 401,
+		}
 	}
-	return 1,nil
+	return 1, nil
 }

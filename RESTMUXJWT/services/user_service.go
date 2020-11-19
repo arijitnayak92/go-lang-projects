@@ -1,9 +1,10 @@
 package services
 
 import (
+	"net/http"
+
 	"github.com/arijitnayak92/taskAfford/RESTMUXJWT/domain"
 	"github.com/arijitnayak92/taskAfford/RESTMUXJWT/utils"
-	"github.com/gin-gonic/gin"
 )
 
 var (
@@ -13,8 +14,8 @@ var (
 type userServiceIntrface interface {
 	Login(u *domain.User) (map[string]string, *utils.APIError)
 	CreateUser(user *domain.User) (*domain.User, *utils.APIError)
-	RefreshToken(c *gin.Context) (map[string]string, *utils.APIError)
-	Logout(c *gin.Context) (int, *utils.APIError)
+	RefreshToken(req *http.Request) (map[string]string, *utils.APIError)
+	Logout(req *http.Request) (int, *utils.APIError)
 }
 
 func init() {
@@ -31,10 +32,10 @@ func (u *usersServices) CreateUser(user *domain.User) (*domain.User, *utils.APIE
 	return domain.UserMethods.CreateUser(user)
 }
 
-func (u *usersServices) RefreshToken(c *gin.Context) (map[string]string, *utils.APIError) {
-	return domain.UserMethods.Refresh(c)
+func (u *usersServices) RefreshToken(req *http.Request) (map[string]string, *utils.APIError) {
+	return domain.UserMethods.Refresh(req)
 }
 
-func (u *usersServices) Logout(c *gin.Context) (int, *utils.APIError) {
-	return domain.UserMethods.Logout(c)
+func (u *usersServices) Logout(req *http.Request) (int, *utils.APIError) {
+	return domain.UserMethods.Logout(req)
 }
