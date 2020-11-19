@@ -35,7 +35,7 @@ func CreateUser(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	user, apiError := services.UserService.CreateUser(u)
+	user, apiError := services.UserServiceMux.CreateUser(u)
 	if apiError != nil {
 		jsonValue, _ := json.Marshal(apiError)
 		res.WriteHeader(apiError.StatusCode)
@@ -70,7 +70,7 @@ func Login(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	user, apiError := services.UserService.Login(u)
+	user, apiError := services.UserServiceMux.Login(u)
 	if apiError != nil {
 		jsonValue, _ := json.Marshal(apiError)
 		res.WriteHeader(apiError.StatusCode)
@@ -83,7 +83,7 @@ func Login(res http.ResponseWriter, req *http.Request) {
 }
 
 func RefreshToken(res http.ResponseWriter, req *http.Request) {
-	token, apiError := services.UserService.RefreshToken(req)
+	token, apiError := services.UserServiceMux.RefreshTokens(req)
 	if apiError != nil {
 		jsonValue, _ := json.Marshal(apiError)
 		res.WriteHeader(apiError.StatusCode)
@@ -96,7 +96,7 @@ func RefreshToken(res http.ResponseWriter, req *http.Request) {
 }
 
 func Logout(res http.ResponseWriter, req *http.Request) {
-	_, apiError := services.UserService.Logout(req)
+	_, apiError := services.UserServiceMux.LogoutUser(req)
 	if apiError != nil {
 		jsonValue, _ := json.Marshal(apiError)
 		res.WriteHeader(apiError.StatusCode)

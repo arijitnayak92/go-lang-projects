@@ -1,26 +1,26 @@
 package auth
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"github.com/arijitnayak92/taskAfford/RESTMUXJWT/domain"
-	"github.com/gin-gonic/gin"
 )
 
-func TokenAuthMiddleware() gin.HandlerFunc {
-	return gin.HandlerFunc(func(c *gin.Context) {
-		err := domain.UserMethods.TokenValid(c.Request)
+func TokenAuthMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+		err := domain.UserMethodMux.TokenValid(req)
 		fmt.Println("in auth")
 		fmt.Println(err)
 		if err != nil {
 			fmt.Println("Got error")
-			c.JSON(http.StatusUnauthorized, err)
-			c.Abort()
+			res.WriteHeader(401)
+			jsonVaue, _ := json.Marshal(err)
+			res.Write(jsonVaue)
 			return
 		}
-		accessDetails, _ := domain.UserMethods.ExtractTokenMetadata(c.Request)
-		c.Set("accessDetails", accessDetails)
-		c.Next()
+		// accessDetails, _ := domain.UserMethodMux.ExtractTokenMetadata(req)
+		next.ServeHTTP(res, req)
 	})
 }

@@ -1,105 +1,139 @@
 package controllers
 
 import (
+	"encoding/json"
+	"net/http"
 	"strconv"
 
 	"github.com/arijitnayak92/taskAfford/RESTMUXJWT/domain"
 	"github.com/arijitnayak92/taskAfford/RESTMUXJWT/services"
 	"github.com/arijitnayak92/taskAfford/RESTMUXJWT/utils"
-	"github.com/gin-gonic/gin"
+	"github.com/gorilla/mux"
 )
 
-func GetOneProduct(c *gin.Context) {
-	itemID, err := strconv.ParseInt(c.Param("item_id"), 10, 64)
+func GetOneProduct(res http.ResponseWriter, req *http.Request) {
+	res.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(req)
+	id := params["item_id"]
+	itemID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		apiError := &utils.APIError{
 			Message:    "User Id shoudl be a number !",
 			StatusCode: 400,
 		}
-		c.JSON(apiError.StatusCode, apiError)
+		jsonValue, _ := json.Marshal(apiError)
+		res.WriteHeader(apiError.StatusCode)
+		res.Write(jsonValue)
 		return
 	}
 	item, errors := services.ItemServicePublic.GetOneItem(itemID)
 	if errors != nil {
-		c.JSON(errors.StatusCode, errors)
+		jsonValue, _ := json.Marshal(errors)
+		res.WriteHeader(errors.StatusCode)
+		res.Write(jsonValue)
 		return
 	}
-	c.JSON(200, item)
+	jsonValue, _ := json.Marshal(item)
+	res.Write(jsonValue)
 }
 
-func GetAllProduct(c *gin.Context) {
+func GetAllProduct(res http.ResponseWriter, req *http.Request) {
+	res.Header().Set("Content-Type", "application/json")
 	items, errors := services.ItemServicePublic.GetAllItem()
 	if errors != nil {
-		c.JSON(errors.StatusCode, errors)
+		jsonValue, _ := json.Marshal(errors)
+		res.WriteHeader(errors.StatusCode)
+		res.Write(jsonValue)
 		return
 	}
-	c.JSON(200, items)
+	jsonValue, _ := json.Marshal(items)
+	res.Write(jsonValue)
 }
 
-func DeleteOneProduct(c *gin.Context) {
-	itemID, err := strconv.ParseInt(c.Param("item_id"), 10, 64)
+func DeleteOneProduct(res http.ResponseWriter, req *http.Request) {
+	res.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(req)
+	id := params["item_id"]
+	itemID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		apiError := &utils.APIError{
 			Message:    "User Id shoudl be a number !",
 			StatusCode: 400,
 		}
-		c.JSON(apiError.StatusCode, apiError)
+		jsonValue, _ := json.Marshal(apiError)
+		res.WriteHeader(apiError.StatusCode)
+		res.Write(jsonValue)
 		return
 	}
 
 	_, errors := services.ItemServicePublic.DeleteItem(itemID)
 	if errors != nil {
-		c.JSON(errors.StatusCode, errors)
+		jsonValue, _ := json.Marshal(errors)
+		res.WriteHeader(errors.StatusCode)
+		res.Write(jsonValue)
 		return
 	}
-	c.JSON(200, "Item Deleted Successfully !")
+	res.Write([]byte("Item Deleted !"))
 }
 
-func UpdateOneProduct(c *gin.Context) {
-	itemID, err := strconv.ParseInt(c.Param("item_id"), 10, 64)
+func UpdateOneProduct(res http.ResponseWriter, req *http.Request) {
+	res.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(req)
+	id := params["item_id"]
+	itemID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		apiError := &utils.APIError{
 			Message:    "User Id shoudl be a number !",
 			StatusCode: 400,
 		}
-		c.JSON(apiError.StatusCode, apiError)
+		jsonValue, _ := json.Marshal(apiError)
+		res.WriteHeader(apiError.StatusCode)
+		res.Write(jsonValue)
 		return
 	}
 
 	newItem := new(domain.Item)
-	err_new := c.BindJSON(&newItem)
-	if err_new != nil {
+	errNew := json.NewDecoder(req.Body).Decode(&newItem)
+	if errNew != nil {
 		apiError := &utils.APIError{
 			Message:    "Insufficient Data !",
 			StatusCode: 406,
 		}
-		c.JSON(apiError.StatusCode, apiError)
+		jsonValue, _ := json.Marshal(apiError)
+		res.WriteHeader(apiError.StatusCode)
+		res.Write(jsonValue)
 		return
 	}
 
 	_, errors := services.ItemServicePublic.UpdateItem(itemID, newItem)
 	if errors != nil {
-		c.JSON(errors.StatusCode, errors)
+		jsonValue, _ := json.Marshal(errors)
+		res.WriteHeader(errors.StatusCode)
+		res.Write(jsonValue)
 		return
 	}
-	c.JSON(200, "Item Updated Successfully !")
+	res.Write([]byte("Item Updated  !"))
 }
 
-func AddProduct(c *gin.Context) {
+func AddProduct(res http.ResponseWriter, req *http.Request) {
+	res.Header().Set("Content-Type", "application/json")
 	newItem := new(domain.Item)
-	err := c.BindJSON(&newItem)
+	err := json.NewDecoder(req.Body).Decode(&newItem)
 	if err != nil {
 		apiError := &utils.APIError{
 			Message:    "Insufficient Data !",
 			StatusCode: 406,
 		}
-		c.JSON(apiError.StatusCode, apiError)
-		return
+		jsonValue, _ := json.Marshal(apiError)
+		res.WriteHeader(apiError.StatusCode)
+		res.Write(jsonValue)
 	}
 	_, errors := services.ItemServicePublic.AddItem(newItem)
 	if errors != nil {
-		c.JSON(errors.StatusCode, errors)
+		jsonValue, _ := json.Marshal(errors)
+		res.WriteHeader(errors.StatusCode)
+		res.Write(jsonValue)
 		return
 	}
-	c.JSON(200, "Successfully Added !")
+	res.Write([]byte("Successfully added !"))
 }

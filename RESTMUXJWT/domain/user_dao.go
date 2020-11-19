@@ -19,14 +19,14 @@ import (
 )
 
 var (
-	client      *redis.Client
-	UserMethods userInterface
+	client        *redis.Client
+	UserMethodMux userInterface
 )
 
 var userCollection = db().Database("goAPI").Collection("loginDB")
 
 func init() {
-	UserMethods = &usersStruct{}
+	UserMethodMux = &usersStruct{}
 	dsn := os.Getenv("REDIS_DSN")
 	if len(dsn) == 0 {
 		dsn = "localhost:6379"
@@ -51,9 +51,9 @@ type userInterface interface {
 	FetchAuth(authD *AccessDetails) (uint64, *utils.APIError)
 	FetchUserID(req *http.Request) (uint64, *utils.APIError)
 	ExtractTokenMetadata(*http.Request) (*AccessDetails, *utils.APIError)
-	Refresh(req *http.Request) (map[string]string, *utils.APIError)
+	RefreshToken(req *http.Request) (map[string]string, *utils.APIError)
 	DeleteAuth(givenUUID string) (int64, *utils.APIError)
-	Logout(req *http.Request) (int, *utils.APIError)
+	LogoutUser(req *http.Request) (int, *utils.APIError)
 }
 
 type usersStruct struct{}
@@ -100,14 +100,14 @@ func (c *usersStruct) Login(userDATA *User) (map[string]string, *utils.APIError)
 			StatusCode: 401,
 		}
 	}
-	ts, err := UserMethods.CreateToken(user.Id)
+	ts, err := UserMethodMux.CreateToken(user.Id)
 	if err != nil {
 		return nil, &utils.APIError{
 			Message:    "Something went wrong !",
 			StatusCode: 422,
 		}
 	}
-	saveErr := UserMethods.CreateAuth(user.Id, ts)
+	saveErr := UserMethodMux.CreateAuth(user.Id, ts)
 	if saveErr != nil {
 		return nil, &utils.APIError{
 			Message:    "Something went wrong !",
@@ -190,7 +190,7 @@ func (t *usersStruct) ExtractToken(r *http.Request) string {
 
 // this function will receive the parsed token and should return the key for validating.
 func (t *usersStruct) VerifyToken(r *http.Request) (*jwt.Token, *utils.APIError) {
-	tokenString := UserMethods.ExtractToken(r)
+	tokenString := UserMethodMux.ExtractToken(r)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -207,7 +207,7 @@ func (t *usersStruct) VerifyToken(r *http.Request) (*jwt.Token, *utils.APIError)
 }
 
 func (t *usersStruct) TokenValid(r *http.Request) *utils.APIError {
-	token, err := UserMethods.VerifyToken(r)
+	token, err := UserMethodMux.VerifyToken(r)
 	if err != nil {
 		return &utils.APIError{
 			Message:    "Invalid Token !",
@@ -225,14 +225,14 @@ func (t *usersStruct) TokenValid(r *http.Request) *utils.APIError {
 
 func (t *usersStruct) FetchUserID(req *http.Request) (uint64, *utils.APIError) {
 	//Extract the access token metadata
-	metadata, err := UserMethods.ExtractTokenMetadata(req)
+	metadata, err := UserMethodMux.ExtractTokenMetadata(req)
 	if err != nil {
 		return 0, &utils.APIError{
 			Message:    "UnAuthorized  !",
 			StatusCode: 401,
 		}
 	}
-	userid, err := UserMethods.FetchAuth(metadata)
+	userid, err := UserMethodMux.FetchAuth(metadata)
 	if err != nil {
 		return 0, &utils.APIError{
 			Message:    "UnAuthorized  !",
@@ -243,7 +243,7 @@ func (t *usersStruct) FetchUserID(req *http.Request) (uint64, *utils.APIError) {
 }
 
 func (t *usersStruct) ExtractTokenMetadata(r *http.Request) (*AccessDetails, *utils.APIError) {
-	token, err := UserMethods.VerifyToken(r)
+	token, err := UserMethodMux.VerifyToken(r)
 	if err != nil {
 		return nil, &utils.APIError{
 			Message:    "Invalid Token  !",
@@ -295,7 +295,7 @@ func (t *usersStruct) FetchAuth(authD *AccessDetails) (uint64, *utils.APIError) 
 	return userID, nil
 }
 
-func (t *usersStruct) Refresh(req *http.Request) (map[string]string, *utils.APIError) {
+func (t *usersStruct) RefreshToken(req *http.Request) (map[string]string, *utils.APIError) {
 	mapToken := map[string]string{}
 	if err := json.NewDecoder(req.Body).Decode(&mapToken); err != nil {
 		return nil, &utils.APIError{
@@ -345,7 +345,7 @@ func (t *usersStruct) Refresh(req *http.Request) (map[string]string, *utils.APIE
 			}
 		}
 		//Delete the previous Refresh Token
-		deleted, delErr := UserMethods.DeleteAuth(refreshUuid)
+		deleted, delErr := UserMethodMux.DeleteAuth(refreshUuid)
 		if delErr != nil || deleted == 0 {
 			return nil, &utils.APIError{
 				Message:    "Unauthorized !",
@@ -353,7 +353,7 @@ func (t *usersStruct) Refresh(req *http.Request) (map[string]string, *utils.APIE
 			}
 		}
 		//Create new pairs of refresh and access tokens
-		ts, createErr := UserMethods.CreateToken(userId)
+		ts, createErr := UserMethodMux.CreateToken(userId)
 		if createErr != nil {
 			return nil, &utils.APIError{
 				Message:    "Denied !",
@@ -361,7 +361,7 @@ func (t *usersStruct) Refresh(req *http.Request) (map[string]string, *utils.APIE
 			}
 		}
 		//save the tokens metadata to redis
-		saveErr := UserMethods.CreateAuth(userId, ts)
+		saveErr := UserMethodMux.CreateAuth(userId, ts)
 		if saveErr != nil {
 			return nil, &utils.APIError{
 				Message:    "Denied !",
@@ -395,6 +395,8 @@ func (t *usersStruct) DeleteAuth(givenUUID string) (int64, *utils.APIError) {
 func DeleteTokens(authD *AccessDetails) error {
 	//get the refresh uuid
 	refreshUuid := fmt.Sprintf("%s++%d", authD.AccessUuid, authD.UserId)
+	fmt.Println("printing uuid")
+
 	//delete access token
 	deletedAt, err := client.Del(authD.AccessUuid).Result()
 	if err != nil {
@@ -412,14 +414,15 @@ func DeleteTokens(authD *AccessDetails) error {
 	return nil
 }
 
-func (t *usersStruct) Logout(req *http.Request) (int, *utils.APIError) {
-	metadata, err := UserMethods.ExtractTokenMetadata(req)
+func (t *usersStruct) LogoutUser(req *http.Request) (int, *utils.APIError) {
+	metadata, err := UserMethodMux.ExtractTokenMetadata(req)
 	if err != nil {
 		return 0, &utils.APIError{
 			Message:    "Unauthorized !",
 			StatusCode: 401,
 		}
 	}
+	fmt.Println(metadata)
 	delErr := DeleteTokens(metadata)
 	if delErr != nil {
 		return 0, &utils.APIError{

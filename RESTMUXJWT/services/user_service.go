@@ -8,34 +8,34 @@ import (
 )
 
 var (
-	UserService userServiceIntrface
+	UserServiceMux userServiceIntrface
 )
 
 type userServiceIntrface interface {
 	Login(u *domain.User) (map[string]string, *utils.APIError)
 	CreateUser(user *domain.User) (*domain.User, *utils.APIError)
-	RefreshToken(req *http.Request) (map[string]string, *utils.APIError)
-	Logout(req *http.Request) (int, *utils.APIError)
+	RefreshTokens(req *http.Request) (map[string]string, *utils.APIError)
+	LogoutUser(req *http.Request) (int, *utils.APIError)
 }
 
 func init() {
-	UserService = &usersServices{}
+	UserServiceMux = &usersServices{}
 }
 
 type usersServices struct{}
 
 func (u *usersServices) Login(user *domain.User) (map[string]string, *utils.APIError) {
-	return domain.UserMethods.Login(user)
+	return domain.UserMethodMux.Login(user)
 }
 
 func (u *usersServices) CreateUser(user *domain.User) (*domain.User, *utils.APIError) {
-	return domain.UserMethods.CreateUser(user)
+	return domain.UserMethodMux.CreateUser(user)
 }
 
-func (u *usersServices) RefreshToken(req *http.Request) (map[string]string, *utils.APIError) {
-	return domain.UserMethods.Refresh(req)
+func (u *usersServices) RefreshTokens(req *http.Request) (map[string]string, *utils.APIError) {
+	return domain.UserMethodMux.RefreshToken(req)
 }
 
-func (u *usersServices) Logout(req *http.Request) (int, *utils.APIError) {
-	return domain.UserMethods.Logout(req)
+func (u *usersServices) LogoutUser(req *http.Request) (int, *utils.APIError) {
+	return domain.UserMethodMux.LogoutUser(req)
 }
