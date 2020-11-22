@@ -1,31 +1,24 @@
 package domain
 
 import (
-	"context"
 	"fmt"
 	"log"
 
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	_ "github.com/lib/pq"
 )
 
-func db() *mongo.Client {
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
-
-	// Connect to MongoDB
-	client, err := mongo.Connect(context.TODO(), clientOptions)
-
-	if err != nil {
-		log.Fatal(err)
+func NewDBConn() (con *pg.DB) {
+	address := fmt.Sprintf("%s:%s", "localhost", "5432")
+	options := &pg.Options{
+		User:     "postgres",
+		Password: "root",
+		Addr:     address,
+		Database: "postgres",
+		PoolSize: 50,
 	}
-
-	// Check the connection
-	err = client.Ping(context.TODO(), nil)
-
-	if err != nil {
-		log.Fatal(err)
+	con = pg.Connect(options)
+	if con == nil {
+		log.Error("cannot connect to postgres")
 	}
-
-	fmt.Println("Connected to MongoDB!")
-	return client
+	return
 }

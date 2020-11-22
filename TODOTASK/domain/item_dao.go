@@ -5,20 +5,18 @@ import (
 	"fmt"
 
 	"github.com/arijitnayak92/taskAfford/RESTTODO/utils"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 var (
 	ItemDomain itemInterface
+	pg *pg.DB
 )
 
-var itemCollection = db().Database("goAPI").Collection("items") // get collection "users" from db() which returns *mongo.Client
-
 type itemInterface interface {
-	AddItem(newItem *Item) (*Item, *utils.APIError)
+	AddItem(newItem *Item) (uint64, *utils.APIError)
 	GetOne(itemID int64) (*Item, *utils.APIError)
 	GetAll() ([]*Item, *utils.APIError)
-	UpdateItem(itemID int64, newItem *Item) (*Item, *utils.APIError)
+	UpdateItem(,itemID int64, newItem *Item) (*Item, *utils.APIError)
 	DeleteItem(itemID int64) (*Item, *utils.APIError)
 }
 
@@ -30,29 +28,21 @@ type itemStruct struct {
 	products []*Item
 }
 
-func (c *itemStruct) AddItem(newItem *Item) (*Item, *utils.APIError) {
-	found, _ := ItemDomain.GetOne(newItem.Id)
+func (c *itemStruct) AddItem(newItem *Item) (uint64, *utils.APIError) {
 
-	if (found) != nil {
-		return nil, &utils.APIError{
-			Message:    "Product Id Should be unique !",
-			StatusCode: 406,
-		}
-	}
-	c.products = append(c.products, newItem)
-	_, err := itemCollection.InsertOne(context.TODO(), newItem)
+	insertedID, err := pg.Model(newItem).Returning("id").Insert()
 	if err != nil {
 		return nil, &utils.APIError{
-			Message:    "Something went wrong !",
-			StatusCode: 406,
+			Message:    "Error Occoured while inserting the data !",
+			StatusCode: 422,
 		}
 	}
-	return &Item{}, nil
+	return insertedID, nil
 }
 
 func (c *itemStruct) GetOne(itemID int64) (*Item, *utils.APIError) {
 	var item *Item
-	if err := itemCollection.FindOne(context.TODO(), bson.M{"id": itemID}).Decode(&item); err != nil {
+	if err := pg.Model(item).Where("item.id=?", item.ID).Select(); err != nil {
 		fmt.Println(err)
 		return nil, &utils.APIError{
 			Message:    "Product Not Found !",
@@ -64,20 +54,13 @@ func (c *itemStruct) GetOne(itemID int64) (*Item, *utils.APIError) {
 
 func (c *itemStruct) GetAll() ([]*Item, *utils.APIError) {
 	var items []*Item
-	allData, err := itemCollection.Find(context.TODO(), bson.M{})
+	err := pg.Model(items).Select()
 	if err != nil {
 		return nil, &utils.APIError{
 			Message:    "Product Not Found !",
 			StatusCode: 404,
 		}
 	}
-	if errs := allData.All(context.TODO(), &items); errs != nil {
-		return nil, &utils.APIError{
-			Message:    "Product Not Found !",
-			StatusCode: 404,
-		}
-	}
-	c.products = items
 	return items, nil
 }
 
@@ -90,17 +73,12 @@ func (c *itemStruct) UpdateItem(itemID int64, newItem *Item) (*Item, *utils.APIE
 		}
 	}
 
-	_, err := itemCollection.UpdateOne(
-		context.TODO(),
-		bson.M{"id": itemID},
-		bson.D{
-			{"$set", bson.M{"name": newItem.Name, "price": newItem.Price, "quantity": newItem.Quantity}},
-		},
-	)
+	_, err := pg.Model(newItem).Column("title", "description").Where("id = ?0", itemID).Update()
+
 	if err != nil {
 		return nil, &utils.APIError{
-			Message:    "Something went wrong !",
-			StatusCode: 400,
+			Message:    "Error in processing data !",
+			StatusCode: 422,
 		}
 	}
 
@@ -115,12 +93,12 @@ func (c *itemStruct) DeleteItem(itemID int64) (*Item, *utils.APIError) {
 			StatusCode: errors.StatusCode,
 		}
 	}
-
-	_, err := itemCollection.DeleteOne(context.TODO(), bson.M{"id": itemID})
+	var item *Item
+	_, err := pg.Model(item).Where("id = ?0", itemID).Delete()
 	if err != nil {
 		return nil, &utils.APIError{
-			Message:    "Something went wrong !",
-			StatusCode: 400,
+			Message:    "Error in processing data !",
+			StatusCode: 422,
 		}
 	}
 

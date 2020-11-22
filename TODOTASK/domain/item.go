@@ -1,8 +1,9 @@
 package domain
 
 type Item struct {
-	Id       int64  `json:"id,omitempty" bson:"id,omitempty" `
-	Name     string `json:"name,omitempty" bson:"name,omitempty"`
-	Price    uint64 `json:"price,omitempty" bson:"price,omitempty"`
-	Quantity uint64 `json:"quantity,omitempty" bson:"quantity,omitempty"`
+	tableName   struct{} `pg:"item_table"`
+	ID          uint64   `json:"id" pg:"id,pk"`
+	Title       string   `json:"title,omitempty" pg:"title"`
+	Description string   `json:"description,omitempty" pg:"description"`
+	Status      bool     `json:"status,omitempty" pg:"status"`
 }
