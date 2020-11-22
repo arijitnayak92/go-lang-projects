@@ -41,7 +41,7 @@ func init() {
 }
 
 type userInterface interface {
-	CreateUser(userDATA *User) (*User, *utils.APIError)
+	CreateUser(userDATA *User) (interface{}, *utils.APIError)
 	Login(userDATA *User) (map[string]string, *utils.APIError)
 	CreateToken(userid uint64) (*TokenDetails, *utils.APIError)
 	CreateAuth(userid uint64, td *TokenDetails) *utils.APIError
@@ -58,7 +58,7 @@ type userInterface interface {
 
 type usersStruct struct{}
 
-func (c *usersStruct) CreateUser(userDATA *User) (*User, *utils.APIError) {
+func (c *usersStruct) CreateUser(userDATA *User) (interface{}, *utils.APIError) {
 	var user *User
 	userCollection.FindOne(context.TODO(), bson.M{"username": userDATA.Username}).Decode(&user)
 	if user != nil {
@@ -76,14 +76,15 @@ func (c *usersStruct) CreateUser(userDATA *User) (*User, *utils.APIError) {
 		}
 	}
 	userDATA.Password = string(bytes)
-	_, err := userCollection.InsertOne(context.TODO(), userDATA)
+	addedUser, err := userCollection.InsertOne(context.TODO(), userDATA)
 	if err != nil {
 		return nil, &utils.APIError{
 			Message:    "Something went wrong !",
 			StatusCode: 422,
 		}
 	}
-	return userDATA, nil
+	fmt.Println(addedUser.InsertedID)
+	return addedUser.InsertedID, nil
 }
 
 func (c *usersStruct) Login(userDATA *User) (map[string]string, *utils.APIError) {

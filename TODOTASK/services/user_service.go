@@ -3,8 +3,8 @@ package services
 import (
 	"net/http"
 
-	"github.com/arijitnayak92/taskAfford/RESTMUXJWT/domain"
-	"github.com/arijitnayak92/taskAfford/RESTMUXJWT/utils"
+	"github.com/arijitnayak92/taskAfford/RESTTODO/domain"
+	"github.com/arijitnayak92/taskAfford/RESTTODO/utils"
 )
 
 var (
