@@ -14,12 +14,12 @@ var (
 )
 
 type itemInterface interface {
-	AddItem(newItem *Item) (uint64, *utils.APIError)
-	GetOne(itemID uint64) (*Item, *utils.APIError)
+	AddItem(newItem *Item) (int64, *utils.APIError)
+	GetOne(itemID int64) (*Item, *utils.APIError)
 	GetAll() ([]*Item, *utils.APIError)
-	UpdateItem(itemID uint64, newItem *Item) (bool, *utils.APIError)
-	DeleteItem(itemID uint64) (bool, *utils.APIError)
-	MarkAsDone(itemID uint64) (bool, *utils.APIError)
+	UpdateItem(itemID int64, newItem *Item) (*Item, *utils.APIError)
+	DeleteItem(itemID int64) (*Item, *utils.APIError)
+	MarkAsDone(itemID int64) (*Item, *utils.APIError)
 }
 
 func init() {
@@ -30,8 +30,8 @@ type itemStruct struct {
 	products []*Item
 }
 
-func (c *itemStruct) AddItem(newItem *Item) (uint64, *utils.APIError) {
-	var taskID uint64
+func (c *itemStruct) AddItem(newItem *Item) (int64, *utils.APIError) {
+	var taskID int64
 	statement, err := dbIns.Prepare("INSERT INTO todo(title, description, status) VALUES($1, $2, $3) RETURNING taskID;")
 	statement.QueryRow(newItem)
 	if err != nil {
@@ -43,7 +43,7 @@ func (c *itemStruct) AddItem(newItem *Item) (uint64, *utils.APIError) {
 	return taskID, nil
 }
 
-func (c *itemStruct) GetOne(itemID uint64) (*Item, *utils.APIError) {
+func (c *itemStruct) GetOne(itemID int64) (*Item, *utils.APIError) {
 	statement, err := dbIns.Prepare("SELECT * FROM todo WHERE id= $1;")
 	if err != nil {
 		return nil, &utils.APIError{
@@ -52,7 +52,7 @@ func (c *itemStruct) GetOne(itemID uint64) (*Item, *utils.APIError) {
 		}
 	}
 	row := statement.QueryRow(statement, itemID)
-	var taskID uint64
+	var taskID int64
 	var title string
 	var description string
 	var status bool
@@ -95,7 +95,7 @@ func (c *itemStruct) GetAll() ([]*Item, *utils.APIError) {
 			StatusCode: 404,
 		}
 	}
-	var taskID uint64
+	var taskID int64
 	var title string
 	var description string
 	var status bool
@@ -114,17 +114,17 @@ func (c *itemStruct) GetAll() ([]*Item, *utils.APIError) {
 	return items, nil
 }
 
-func (c *itemStruct) UpdateItem(itemID uint64, newItem *Item) (bool, *utils.APIError) {
+func (c *itemStruct) UpdateItem(itemID int64, newItem *Item) (*Item, *utils.APIError) {
 	_, errors := ItemDomain.GetOne(itemID)
 	if errors != nil {
-		return false, &utils.APIError{
+		return nil, &utils.APIError{
 			Message:    errors.Message,
 			StatusCode: errors.StatusCode,
 		}
 	}
 	statement, err := dbIns.Prepare("UPDATE todo SET title = $1,description = $2 WHERE id = $3;")
 	if err != nil {
-		return false, &utils.APIError{
+		return nil, &utils.APIError{
 			Message:    "Error in processing data !",
 			StatusCode: 422,
 		}
@@ -132,49 +132,49 @@ func (c *itemStruct) UpdateItem(itemID uint64, newItem *Item) (bool, *utils.APIE
 	statement.QueryRow(newItem, itemID)
 
 	if err != nil {
-		return false, &utils.APIError{
+		return nil, &utils.APIError{
 			Message:    "Error in processing data !",
 			StatusCode: 422,
 		}
 	}
 
-	return true, nil
+	return &Item{}, nil
 }
 
-func (c *itemStruct) DeleteItem(itemID uint64) (bool, *utils.APIError) {
+func (c *itemStruct) DeleteItem(itemID int64) (*Item, *utils.APIError) {
 	_, errors := ItemDomain.GetOne(itemID)
 	if errors != nil {
-		return false, &utils.APIError{
+		return nil, &utils.APIError{
 			Message:    errors.Message,
 			StatusCode: errors.StatusCode,
 		}
 	}
 	statement, err := dbIns.Prepare("DELETE FROM todo WHERE id = $1;")
 	if err != nil {
-		return false, &utils.APIError{
+		return nil, &utils.APIError{
 			Message:    "Error in processing data !",
 			StatusCode: 422,
 		}
 	}
 	statement.QueryRow(itemID)
-	return true, nil
+	return &Item{}, nil
 }
 
-func (c *itemStruct) MarkAsDone(itemID uint64) (bool, *utils.APIError) {
+func (c *itemStruct) MarkAsDone(itemID int64) (*Item, *utils.APIError) {
 	_, errors := ItemDomain.GetOne(itemID)
 	if errors != nil {
-		return false, &utils.APIError{
+		return nil, &utils.APIError{
 			Message:    errors.Message,
 			StatusCode: errors.StatusCode,
 		}
 	}
 	statement, err := dbIns.Prepare("UPDATE tasks SET status = true WHERE id = $1;")
 	if err != nil {
-		return false, &utils.APIError{
+		return nil, &utils.APIError{
 			Message:    "Error in processing data !",
 			StatusCode: 422,
 		}
 	}
 	statement.QueryRow(itemID)
-	return true, nil
+	return &Item{}, nil
 }

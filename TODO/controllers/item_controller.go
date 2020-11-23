@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/arijitnayak92/taskAfford/RESTTODO/domain"
-	"github.com/arijitnayak92/taskAfford/RESTTODO/services"
-	"github.com/arijitnayak92/taskAfford/RESTTODO/utils"
+	"github.com/arijitnayak92/taskAfford/TODO/domain"
+	"github.com/arijitnayak92/taskAfford/TODO/services"
+	"github.com/arijitnayak92/taskAfford/TODO/utils"
 	"github.com/gorilla/mux"
 )
 
@@ -92,7 +92,7 @@ func UpdateOneProduct(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	var newItem *domain.Item
+	newItem := new(domain.Item)
 	errNew := json.NewDecoder(req.Body).Decode(&newItem)
 	if errNew != nil {
 		apiError := &utils.APIError{
