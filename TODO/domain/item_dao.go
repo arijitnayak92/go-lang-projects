@@ -1,18 +1,17 @@
 package domain
 
 import (
-	"context"
-	"fmt"
+	"database/sql"
 
 	"github.com/arijitnayak92/taskAfford/TODO/utils"
-	"go.mongodb.org/mongo-driver/bson"
+
+	_ "github.com/lib/pq"
 )
 
 var (
 	ItemDomain itemInterface
+	dbIns      *sql.DB
 )
-
-var itemCollection = db().Database("goAPI").Collection("items") // get collection "users" from db() which returns *mongo.Client
 
 type itemInterface interface {
 	AddItem(newItem *Item) (*Item, *utils.APIError)
@@ -39,45 +38,85 @@ func (c *itemStruct) AddItem(newItem *Item) (*Item, *utils.APIError) {
 			StatusCode: 406,
 		}
 	}
-	c.products = append(c.products, newItem)
-	_, err := itemCollection.InsertOne(context.TODO(), newItem)
+	statement, err := dbIns.Prepare("INSERT INTO todo(title, description, status) VALUES($1, $2, $3);")
 	if err != nil {
 		return nil, &utils.APIError{
 			Message:    "Something went wrong !",
 			StatusCode: 406,
 		}
 	}
+	statement.QueryRow(newItem)
 	return &Item{}, nil
 }
 
 func (c *itemStruct) GetOne(itemID int64) (*Item, *utils.APIError) {
-	var item *Item
-	if err := itemCollection.FindOne(context.TODO(), bson.M{"id": itemID}).Decode(&item); err != nil {
-		fmt.Println(err)
+	statement, err := dbIns.Prepare("SELECT * FROM todo WHERE id= $1;")
+	if err != nil {
+		return nil, &utils.APIError{
+			Message:    "Error in DBInstances !",
+			StatusCode: 422,
+		}
+	}
+	row := statement.QueryRow(statement, itemID)
+	var taskID int64
+	var title string
+	var description string
+	var status bool
+
+	switch errs := row.Scan(&taskID, &title, &description, &status); errs {
+	case sql.ErrNoRows:
+		return nil, &utils.APIError{
+			Message:    "Product Not Found !",
+			StatusCode: 404,
+		}
+	case nil:
+		return &Item{
+			Id:          itemID,
+			Title:       title,
+			Description: description,
+			Status:      status,
+		}, nil
+	default:
 		return nil, &utils.APIError{
 			Message:    "Product Not Found !",
 			StatusCode: 404,
 		}
 	}
-	return item, nil
 }
 
 func (c *itemStruct) GetAll() ([]*Item, *utils.APIError) {
 	var items []*Item
-	allData, err := itemCollection.Find(context.TODO(), bson.M{})
+
+	statement, err := dbIns.Prepare("SELECT * FROM todo;")
 	if err != nil {
 		return nil, &utils.APIError{
-			Message:    "Product Not Found !",
-			StatusCode: 404,
+			Message:    "Error in DBInstances !",
+			StatusCode: 422,
 		}
 	}
-	if errs := allData.All(context.TODO(), &items); errs != nil {
+	rows, errs := statement.Query(statement)
+	if errs != nil {
 		return nil, &utils.APIError{
-			Message:    "Product Not Found !",
+			Message:    "Products Not Found !",
 			StatusCode: 404,
 		}
 	}
-	c.products = items
+	var taskID int64
+	var title string
+	var description string
+	var status bool
+	i := 0
+	for rows.Next() {
+		i++
+		rows.Scan(&taskID, &title, &description, &status)
+		items = append(items, &Item{
+			Id:          taskID,
+			Title:       title,
+			Description: description,
+			Status:      status,
+		})
+	}
+
 	return items, nil
 }
 
@@ -90,13 +129,15 @@ func (c *itemStruct) UpdateItem(itemID int64, newItem *Item) (*Item, *utils.APIE
 		}
 	}
 
-	_, err := itemCollection.UpdateOne(
-		context.TODO(),
-		bson.M{"id": itemID},
-		bson.D{
-			{"$set", bson.M{"name": newItem.Name, "price": newItem.Price, "quantity": newItem.Quantity}},
-		},
-	)
+	statement, err := dbIns.Prepare("UPDATE todo SET title = $1,description = $2 WHERE id = $3;")
+	if err != nil {
+		return nil, &utils.APIError{
+			Message:    "Error in processing data !",
+			StatusCode: 422,
+		}
+	}
+	statement.QueryRow(newItem, itemID)
+
 	if err != nil {
 		return nil, &utils.APIError{
 			Message:    "Something went wrong !",
@@ -115,14 +156,14 @@ func (c *itemStruct) DeleteItem(itemID int64) (*Item, *utils.APIError) {
 			StatusCode: errors.StatusCode,
 		}
 	}
-
-	_, err := itemCollection.DeleteOne(context.TODO(), bson.M{"id": itemID})
+	statement, err := dbIns.Prepare("DELETE FROM todo WHERE id = $1;")
 	if err != nil {
 		return nil, &utils.APIError{
-			Message:    "Something went wrong !",
-			StatusCode: 400,
+			Message:    "Error in processing data !",
+			StatusCode: 422,
 		}
 	}
+	statement.QueryRow(itemID)
 
 	return &Item{}, nil
 }

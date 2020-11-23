@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/arijitnayak92/taskAfford/RESTMUXJWT/app"
+	"github.com/arijitnayak92/taskAfford/TODO/app"
 )
 
 func main() {

@@ -1,31 +1,22 @@
 package domain
 
 import (
-	"context"
-	"fmt"
+	"database/sql"
 	"log"
 
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"github.com/arijitnayak92/taskAfford/TODO/config"
 )
 
-func db() *mongo.Client {
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+var db *sql.DB
 
-	// Connect to MongoDB
-	client, err := mongo.Connect(context.TODO(), clientOptions)
-
+func InitDB() *sql.DB {
+	var err error
+	db, err = sql.Open("postgres", config.Db().ConnString())
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("failed to load the database: %s", err)
 	}
-
-	// Check the connection
-	err = client.Ping(context.TODO(), nil)
-
-	if err != nil {
-		log.Fatal(err)
+	if err = db.Ping(); err != nil {
+		log.Fatalf("ping to database failed :%s", err)
 	}
-
-	fmt.Println("Connected to MongoDB!")
-	return client
+	return db
 }

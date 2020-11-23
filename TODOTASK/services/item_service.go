@@ -10,7 +10,7 @@ var (
 )
 
 type itemServicesInterface interface {
-	AddItem(newItem *domain.Item) (*domain.Item, *utils.APIError)
+	AddItem(newItem *domain.Item) (int64, *utils.APIError)
 	GetOneItem(itemID int64) (*domain.Item, *utils.APIError)
 	GetAllItem() ([]*domain.Item, *utils.APIError)
 	UpdateItem(itemID int64, newItem *domain.Item) (*domain.Item, *utils.APIError)
@@ -23,7 +23,7 @@ func init() {
 
 type itemServices struct{}
 
-func (c *itemServices) AddItem(newItem *domain.Item) (*domain.Item, *utils.APIError) {
+func (c *itemServices) AddItem(newItem *domain.Item) (int64, *utils.APIError) {
 	return domain.ItemDomain.AddItem(newItem)
 }
 
