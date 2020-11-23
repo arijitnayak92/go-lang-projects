@@ -11,10 +11,10 @@ var (
 
 type itemServicesInterface interface {
 	AddItem(newItem *domain.Item) (*domain.Item, *utils.APIError)
-	GetOneItem(itemID int64) (*domain.Item, *utils.APIError)
+	GetOneItem(itemID uint64) (*domain.Item, *utils.APIError)
 	GetAllItem() ([]*domain.Item, *utils.APIError)
-	UpdateItem(itemID int64, newItem *domain.Item) (*domain.Item, *utils.APIError)
-	DeleteItem(itemID int64) (*domain.Item, *utils.APIError)
+	UpdateItem(itemID uint64, newItem *domain.Item) (bool, *utils.APIError)
+	DeleteItem(itemID uint64) (bool, *utils.APIError)
 }
 
 func init() {
@@ -35,10 +35,10 @@ func (c *itemServices) GetAllItem() ([]*domain.Item, *utils.APIError) {
 	return domain.ItemDomain.GetAll()
 }
 
-func (c *itemServices) UpdateItem(itemID int64, newItem *domain.Item) (*domain.Item, *utils.APIError) {
+func (c *itemServices) UpdateItem(itemID uint64, newItem *domain.Item) (bool, *utils.APIError) {
 	return domain.ItemDomain.UpdateItem(itemID, newItem)
 }
 
-func (c *itemServices) DeleteItem(itemID int64) (*domain.Item, *utils.APIError) {
+func (c *itemServices) DeleteItem(itemID uint64) (bool, *utils.APIError) {
 	return domain.ItemDomain.DeleteItem(itemID)
 }
