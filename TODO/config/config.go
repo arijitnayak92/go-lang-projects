@@ -12,11 +12,12 @@ type Config struct {
 func Load() {
 	appConfig = Config{
 		db: DBConfig{
-			host:     "localhost",
+			host:     "ec2-54-157-88-70.compute-1.amazonaws.com",
 			port:     5432,
-			name:     "todo",
-			user:     "postgres",
-			password: "root",
+			name:     "d2nlmudsli8cmv",
+			user:     "sdxlaekjnjhlxu",
+			password: "b0493e3465956df4b0645747ace1a8df23377addbe929148148cebe263bd2fa5",
+			sslmode:  "disabled",
 		},
 	}
 }

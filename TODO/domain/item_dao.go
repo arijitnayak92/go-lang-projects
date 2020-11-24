@@ -2,6 +2,7 @@ package domain
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/arijitnayak92/taskAfford/TODO/utils"
 
@@ -22,6 +23,7 @@ type itemInterface interface {
 }
 
 func init() {
+	fmt.Println(dbIns)
 	ItemDomain = &itemStruct{}
 }
 

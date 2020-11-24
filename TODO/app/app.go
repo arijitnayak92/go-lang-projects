@@ -5,6 +5,8 @@ import (
 
 	"net/http"
 
+	"github.com/arijitnayak92/taskAfford/TODO/config"
+	"github.com/arijitnayak92/taskAfford/TODO/domain"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
@@ -16,6 +18,8 @@ func init() {
 	if err != nil {
 		log.Fatalf("Error loading .env file")
 	}
+	config.Load()
+	domain.InitDB()
 }
 
 func StartApp() {
