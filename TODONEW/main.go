@@ -1,13 +1,32 @@
 package main
 
-import "os"
+import (
+	//...
+	"fmt"
+	"log"
+	"net/http"
+	"time"
+
+	"github.com/arijitnayak92/taskAfford/TODONEW/db"
+	"github.com/arijitnayak92/taskAfford/TODONEW/handler"
+	//...
+)
 
 func main() {
-	a := App{}
-	a.Initialize(
-		os.Getenv("APP_DB_USERNAME"),
-		os.Getenv("APP_DB_PASSWORD"),
-		os.Getenv("APP_DB_NAME"))
+	var postgres *db.Postgres
+	var err error
+	for i := 0; i < 10; i++ {
+		time.Sleep(3 * time.Second)
+		postgres, err = db.ConnectPostgres()
+	}
+	if err != nil {
+		panic(err)
+	} else if postgres == nil {
+		panic("postgres is nil")
+	}
 
-	a.Run(":8010")
+	mux := handler.SetUpRouting(postgres)
+
+	fmt.Println("http://localhost:8080")
+	log.Fatal(http.ListenAndServe(":8080", mux))
 }
