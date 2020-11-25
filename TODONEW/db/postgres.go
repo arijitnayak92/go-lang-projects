@@ -50,6 +50,13 @@ func (p *Postgres) Insert(todo *schema.Todo) (int, *utils.APIError) {
 
 //...
 func (p *Postgres) Delete(id int) *utils.APIError {
+	_, notFound := p.GetOne(id)
+	if notFound != nil {
+		return &utils.APIError{
+			Message:    "No Data Found Against this Id !",
+			StatusCode: 404,
+		}
+	}
 	query := `
         DELETE FROM todo
         WHERE id = $1;
@@ -67,6 +74,13 @@ func (p *Postgres) Delete(id int) *utils.APIError {
 
 //...
 func (p *Postgres) Update(id int, todo *schema.Todo) *utils.APIError {
+	_, notFound := p.GetOne(id)
+	if notFound != nil {
+		return &utils.APIError{
+			Message:    "No Data Found Against this Id !",
+			StatusCode: 404,
+		}
+	}
 
 	query := `
        UPDATE todo SET title = $1,note = $2 WHERE id = $3
@@ -84,6 +98,14 @@ func (p *Postgres) Update(id int, todo *schema.Todo) *utils.APIError {
 
 //...
 func (p *Postgres) MarkAsDone(id int, status bool) *utils.APIError {
+	_, notFound := p.GetOne(id)
+	if notFound != nil {
+		return &utils.APIError{
+			Message:    "No Data Found Against this Id !",
+			StatusCode: 404,
+		}
+	}
+
 	query := `
         UPDATE todo SET status = $1 WHERE id = $2
     `

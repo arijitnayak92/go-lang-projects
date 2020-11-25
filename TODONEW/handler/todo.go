@@ -39,6 +39,14 @@ func (handler *todoHandler) saveTodo(w http.ResponseWriter, r *http.Request) {
 		utils.ResponseError(w, apiError)
 		return
 	}
+	if todo.Title == "" || todo.Note == "" {
+		apiError := &utils.APIError{
+			Message:    "Enter all the details !",
+			StatusCode: 406,
+		}
+		utils.ResponseError(w, apiError)
+		return
+	}
 
 	id, errI := service.Insert(ctx, &todo)
 	if errI != nil {
@@ -80,6 +88,15 @@ func (handler *todoHandler) updateTodo(w http.ResponseWriter, r *http.Request) {
 		apiError := &utils.APIError{
 			Message:    "Wrong Input Data !",
 			StatusCode: 400,
+		}
+		utils.ResponseError(w, apiError)
+		return
+	}
+
+	if todo.Title == "" || todo.Note == "" {
+		apiError := &utils.APIError{
+			Message:    "Enter all the details !",
+			StatusCode: 406,
 		}
 		utils.ResponseError(w, apiError)
 		return
