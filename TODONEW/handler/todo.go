@@ -1,68 +1,175 @@
 package handler
 
 import (
-	// ...
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	// ...
+	"strconv"
+
+	"github.com/arijitnayak92/taskAfford/TODONEW/db"
 	"github.com/arijitnayak92/taskAfford/TODONEW/schema"
-	"github.com/taskAfford/TODONEW/service"
+	"github.com/arijitnayak92/taskAfford/TODONEW/service"
+	"github.com/arijitnayak92/taskAfford/TODONEW/utils"
+	"github.com/gorilla/mux"
 )
 
 type todoHandler struct {
 	postgres *db.Postgres
-	samples  *db.Sample
 }
 
-//...
 func (handler *todoHandler) saveTodo(w http.ResponseWriter, r *http.Request) {
 	ctx := db.SetRepository(r.Context(), handler.postgres)
 
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		responseError(w, http.StatusInternalServerError, err.Error())
+		apiError := &utils.APIError{
+			Message:    "Can't able to read user data !",
+			StatusCode: 500,
+		}
+		utils.ResponseError(w, apiError)
 		return
 	}
 
 	var todo schema.Todo
 	if err := json.Unmarshal(b, &todo); err != nil {
-		responseError(w, http.StatusBadRequest, err.Error())
+		apiError := &utils.APIError{
+			Message:    "Wrong Input Data !",
+			StatusCode: 400,
+		}
+		utils.ResponseError(w, apiError)
 		return
 	}
 
-	id, err := service.Insert(ctx, &todo)
+	id, errI := service.Insert(ctx, &todo)
+	if errI != nil {
+		apiError := &utils.APIError{
+			Message:    errI.Message,
+			StatusCode: errI.StatusCode,
+		}
+		utils.ResponseError(w, apiError)
+		return
+	}
+	utils.ResponseOK(w, id)
+}
+
+func (handler *todoHandler) updateTodo(w http.ResponseWriter, r *http.Request) {
+	ctx := db.SetRepository(r.Context(), handler.postgres)
+	params := mux.Vars(r)
+	todoID := params["todo_id"]
+	intID, errC := strconv.Atoi(todoID)
+	if errC != nil {
+		apiError := &utils.APIError{
+			Message:    "Todo Id should be a number !",
+			StatusCode: 422,
+		}
+		utils.ResponseError(w, apiError)
+		return
+	}
+	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		responseError(w, http.StatusInternalServerError, err.Error())
+		apiError := &utils.APIError{
+			Message:    "Can't able to read user data !",
+			StatusCode: 500,
+		}
+		utils.ResponseError(w, apiError)
 		return
 	}
 
-	responseOk(w, id)
+	var todo schema.Todo
+	if err := json.Unmarshal(b, &todo); err != nil {
+		apiError := &utils.APIError{
+			Message:    "Wrong Input Data !",
+			StatusCode: 400,
+		}
+		utils.ResponseError(w, apiError)
+		return
+	}
+
+	errs := service.Update(ctx, intID, &todo)
+	if errs != nil {
+		apiError := &utils.APIError{
+			Message:    errs.Message,
+			StatusCode: errs.StatusCode,
+		}
+		utils.ResponseError(w, apiError)
+		return
+	}
+	utils.ResponseOK(w, nil)
+}
+
+func (handler *todoHandler) markAsDone(w http.ResponseWriter, r *http.Request) {
+	ctx := db.SetRepository(r.Context(), handler.postgres)
+	params := mux.Vars(r)
+	todoID := params["todo_id"]
+	intID, errC := strconv.Atoi(todoID)
+	if errC != nil {
+		apiError := &utils.APIError{
+			Message:    "Todo Id should be a number !",
+			StatusCode: 422,
+		}
+		utils.ResponseError(w, apiError)
+		return
+	}
+
+	b, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		apiError := &utils.APIError{
+			Message:    "Can't able to read user data !",
+			StatusCode: 500,
+		}
+		utils.ResponseError(w, apiError)
+		return
+	}
+
+	var req struct {
+		Status bool `json:"status"`
+	}
+	if err := json.Unmarshal(b, &req); err != nil {
+		apiError := &utils.APIError{
+			Message:    "Wrong Input Data !",
+			StatusCode: 400,
+		}
+		utils.ResponseError(w, apiError)
+		return
+	}
+
+	errs := service.MarkAsDone(ctx, intID, req.Status)
+	if errs != nil {
+		apiError := &utils.APIError{
+			Message:    errs.Message,
+			StatusCode: errs.StatusCode,
+		}
+		utils.ResponseError(w, apiError)
+		return
+	}
+
+	utils.ResponseOK(w, nil)
 }
 
 func (handler *todoHandler) deleteTodo(w http.ResponseWriter, r *http.Request) {
 	ctx := db.SetRepository(r.Context(), handler.postgres)
 
-	b, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		responseError(w, http.StatusInternalServerError, err.Error())
+	params := mux.Vars(r)
+	todoID := params["todo_id"]
+	intID, errC := strconv.Atoi(todoID)
+	if errC != nil {
+		apiError := &utils.APIError{
+			Message:    "Todo Id should be a number !",
+			StatusCode: 422,
+		}
+		utils.ResponseError(w, apiError)
 		return
 	}
 
-	var req struct {
-		ID int `json:"id"`
-	}
-	if err := json.Unmarshal(b, &req); err != nil {
-		responseError(w, http.StatusBadRequest, err.Error())
+	if err := service.Delete(ctx, intID); err != nil {
+		apiError := &utils.APIError{
+			Message:    err.Message,
+			StatusCode: err.StatusCode,
+		}
+		utils.ResponseError(w, apiError)
 		return
 	}
-
-	if err := service.Delete(ctx, req.ID); err != nil {
-		responseError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
+	utils.ResponseOK(w, nil)
 }
 
 func (handler *todoHandler) getAllTodo(w http.ResponseWriter, r *http.Request) {
@@ -70,9 +177,39 @@ func (handler *todoHandler) getAllTodo(w http.ResponseWriter, r *http.Request) {
 
 	todoList, err := service.GetAll(ctx)
 	if err != nil {
-		responseError(w, http.StatusInternalServerError, err.Error())
+		apiError := &utils.APIError{
+			Message:    err.Message,
+			StatusCode: err.StatusCode,
+		}
+		utils.ResponseError(w, apiError)
 		return
 	}
 
-	responseOk(w, todoList)
+	utils.ResponseOK(w, todoList)
+}
+
+func (handler *todoHandler) getOneTodo(w http.ResponseWriter, r *http.Request) {
+	ctx := db.SetRepository(r.Context(), handler.postgres)
+	params := mux.Vars(r)
+	todoID := params["todo_id"]
+	intID, errC := strconv.Atoi(todoID)
+	if errC != nil {
+		apiError := &utils.APIError{
+			Message:    "Todo Id should be a number !",
+			StatusCode: 422,
+		}
+		utils.ResponseError(w, apiError)
+		return
+	}
+	todoOne, err := service.GetOne(ctx, intID)
+	if err != nil {
+		apiError := &utils.APIError{
+			Message:    err.Message,
+			StatusCode: err.StatusCode,
+		}
+		utils.ResponseError(w, apiError)
+		return
+	}
+
+	utils.ResponseOK(w, todoOne)
 }

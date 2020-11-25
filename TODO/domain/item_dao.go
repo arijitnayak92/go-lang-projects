@@ -11,7 +11,6 @@ import (
 
 var (
 	ItemDomain itemInterface
-	dbIns      *sql.DB
 )
 
 type itemInterface interface {
@@ -23,12 +22,13 @@ type itemInterface interface {
 }
 
 func init() {
-	fmt.Println(dbIns)
-	ItemDomain = &itemStruct{}
+	fmt.Println("Inside Domain")
+	fmt.Println(db)
 }
 
 type itemStruct struct {
 	products []*Item
+	DB       *sql.DB
 }
 
 func (c *itemStruct) AddItem(newItem *Item) (*Item, *utils.APIError) {
@@ -40,7 +40,7 @@ func (c *itemStruct) AddItem(newItem *Item) (*Item, *utils.APIError) {
 			StatusCode: 406,
 		}
 	}
-	statement, err := dbIns.Prepare("INSERT INTO todo(title, description, status) VALUES($1, $2, $3);")
+	statement, err := c.DB.Prepare("INSERT INTO todo(title, description, status) VALUES($1, $2, $3);")
 	if err != nil {
 		return nil, &utils.APIError{
 			Message:    "Something went wrong !",
@@ -52,7 +52,7 @@ func (c *itemStruct) AddItem(newItem *Item) (*Item, *utils.APIError) {
 }
 
 func (c *itemStruct) GetOne(itemID int64) (*Item, *utils.APIError) {
-	statement, err := dbIns.Prepare("SELECT * FROM todo WHERE id= $1;")
+	statement, err := c.DB.Prepare("SELECT * FROM todo WHERE id= $1;")
 	if err != nil {
 		return nil, &utils.APIError{
 			Message:    "Error in DBInstances !",
@@ -87,9 +87,12 @@ func (c *itemStruct) GetOne(itemID int64) (*Item, *utils.APIError) {
 }
 
 func (c *itemStruct) GetAll() ([]*Item, *utils.APIError) {
+	fmt.Println("Inside Domain")
+	fmt.Println(c.DB)
+
 	var items []*Item
 
-	statement, err := dbIns.Prepare("SELECT * FROM todo;")
+	statement, err := c.DB.Prepare("SELECT * FROM todo;")
 	if err != nil {
 		return nil, &utils.APIError{
 			Message:    "Error in DBInstances !",
@@ -131,7 +134,7 @@ func (c *itemStruct) UpdateItem(itemID int64, newItem *Item) (*Item, *utils.APIE
 		}
 	}
 
-	statement, err := dbIns.Prepare("UPDATE todo SET title = $1,description = $2 WHERE id = $3;")
+	statement, err := c.DB.Prepare("UPDATE todo SET title = $1,description = $2 WHERE id = $3;")
 	if err != nil {
 		return nil, &utils.APIError{
 			Message:    "Error in processing data !",
@@ -158,7 +161,7 @@ func (c *itemStruct) DeleteItem(itemID int64) (*Item, *utils.APIError) {
 			StatusCode: errors.StatusCode,
 		}
 	}
-	statement, err := dbIns.Prepare("DELETE FROM todo WHERE id = $1;")
+	statement, err := c.DB.Prepare("DELETE FROM todo WHERE id = $1;")
 	if err != nil {
 		return nil, &utils.APIError{
 			Message:    "Error in processing data !",

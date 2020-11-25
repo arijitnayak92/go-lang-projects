@@ -1,6 +1,8 @@
 package services
 
 import (
+	"fmt"
+
 	"github.com/arijitnayak92/taskAfford/TODO/domain"
 	"github.com/arijitnayak92/taskAfford/TODO/utils"
 )
@@ -17,10 +19,6 @@ type itemServicesInterface interface {
 	DeleteItem(itemID int64) (*domain.Item, *utils.APIError)
 }
 
-func init() {
-	ItemServicePublic = &itemServices{}
-}
-
 type itemServices struct{}
 
 func (c *itemServices) AddItem(newItem *domain.Item) (*domain.Item, *utils.APIError) {
@@ -32,6 +30,7 @@ func (c *itemServices) GetOneItem(itemID int64) (*domain.Item, *utils.APIError) 
 }
 
 func (c *itemServices) GetAllItem() ([]*domain.Item, *utils.APIError) {
+	fmt.Println("Inside Service")
 	return domain.ItemDomain.GetAll()
 }
 

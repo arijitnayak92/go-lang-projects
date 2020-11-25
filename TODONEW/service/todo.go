@@ -5,20 +5,29 @@ import (
 
 	"github.com/arijitnayak92/taskAfford/TODONEW/db"
 	"github.com/arijitnayak92/taskAfford/TODONEW/schema"
+	"github.com/arijitnayak92/taskAfford/TODONEW/utils"
 )
 
-func Close(ctx context.Context) {
-	db.Close(ctx)
-}
-
-func Insert(ctx context.Context, todo *schema.Todo) (int, error) {
+func Insert(ctx context.Context, todo *schema.Todo) (int, *utils.APIError) {
 	return db.Insert(ctx, todo)
 }
 
-func Delete(ctx context.Context, id int) error {
+func Delete(ctx context.Context, id int) *utils.APIError {
 	return db.Delete(ctx, id)
 }
 
-func GetAll(ctx context.Context) ([]schema.Todo, error) {
+func Update(ctx context.Context, id int, todo *schema.Todo) *utils.APIError {
+	return db.Update(ctx, id, todo)
+}
+
+func MarkAsDone(ctx context.Context, id int, status bool) *utils.APIError {
+	return db.MarkAsDone(ctx, id, status)
+}
+
+func GetAll(ctx context.Context) ([]schema.Todo, *utils.APIError) {
 	return db.GetAll(ctx)
+}
+
+func GetOne(ctx context.Context, id int) (schema.Todo, *utils.APIError) {
+	return db.GetOne(ctx, id)
 }

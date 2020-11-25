@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -38,7 +39,9 @@ func GetOneProduct(res http.ResponseWriter, req *http.Request) {
 }
 
 func GetAllProduct(res http.ResponseWriter, req *http.Request) {
+	fmt.Println("Listened Here")
 	res.Header().Set("Content-Type", "application/json")
+	fmt.Println("Calling Service")
 	items, errors := services.ItemServicePublic.GetAllItem()
 	if errors != nil {
 		jsonValue, _ := json.Marshal(errors)
