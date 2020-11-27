@@ -9,14 +9,13 @@ import (
 	"reflect"
 	"strings"
 	"testing"
-	// ...
+
 	"github.com/arijitnayak92/taskAfford/TODONEW/db"
 	"github.com/arijitnayak92/taskAfford/TODONEW/handler"
 	"github.com/arijitnayak92/taskAfford/TODONEW/schema"
 	"github.com/arijitnayak92/taskAfford/TODONEW/testdb"
 	"github.com/arijitnayak92/taskAfford/TODONEW/utils"
 	"github.com/gorilla/mux"
-	// ...
 )
 
 //...
@@ -40,7 +39,7 @@ func TestGetAllTodo(t *testing.T) {
 		t.Fatal(err)
 	}
 	var errs error
-	req, errs := http.NewRequest(http.MethodGet, "http://localhost:8080/getAll", nil)
+	req, errs := http.NewRequest(http.MethodGet, "http://localhost:8080/todos", nil)
 	if errs != nil {
 		t.Fatal(errs)
 	}
@@ -63,7 +62,7 @@ func TestSaveTodo(t *testing.T) {
 
 	body := []byte(`{"id":1,"title":"My Task1","note":"","status":false}`)
 
-	req, err := http.NewRequest(http.MethodPost, "http://localhost:8080/addTodo", bytes.NewReader(body))
+	req, err := http.NewRequest(http.MethodPost, "http://localhost:8080/todo", bytes.NewReader(body))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -111,7 +110,7 @@ func TestDeleteTodo(t *testing.T) {
 
 	body := []byte(fmt.Sprintf(`{"id":%d}`, id))
 	var errs error
-	req, errs := http.NewRequest(http.MethodDelete, `http://localhost:8080/deleteTodo/${id}`, bytes.NewReader(body))
+	req, errs := http.NewRequest(http.MethodDelete, `http://localhost:8080/todos/${id}`, bytes.NewReader(body))
 	if errs != nil {
 		t.Fatal(errs)
 	}
@@ -134,5 +133,43 @@ func TestDeleteTodo(t *testing.T) {
 
 	if len(gotTodo) > 0 {
 		t.Fatalf("Should return the empty slice, Got: %v\n", gotTodo)
+	}
+}
+
+func TestUpdateTodo(t *testing.T) {
+	postgres := &db.Postgres{testdb.Setup()}
+	testServer := setupServer(postgres)
+
+	body := []byte(`{"id":1,"title":"My Task1[Updated]","note":"New Note","status":false}`)
+
+	req, err := http.NewRequest(http.MethodPut, `http://localhost:8080/todos/${body.id}`, bytes.NewReader(body))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rec := httptest.NewRecorder()
+	testServer.ServeHTTP(rec, req)
+
+	got := strings.TrimSpace(rec.Body.String())
+	want := "Successfully Updated !"
+
+	if got != want {
+		t.Fatalf("Want: %v, Got: %v", want, got)
+	}
+	var errs *utils.APIError
+	gotTodo, errs := postgres.GetAll()
+	if errs != nil {
+		t.Fatal(errs)
+	}
+
+	wantTodo := []schema.Todo{
+		{
+			Title:  "My Task1",
+			Status: false,
+		},
+	}
+
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("Want: %v, Got: %v\n", wantTodo, gotTodo)
 	}
 }

@@ -6,4 +6,5 @@ require (
 	github.com/cohhei/go-to-the-handson v0.0.0-20180828234540-363761197682
 	github.com/gorilla/mux v1.8.0
 	github.com/lib/pq v1.8.0
+	github.com/rs/cors v1.7.0
 )

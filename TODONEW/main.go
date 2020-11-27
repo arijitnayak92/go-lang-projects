@@ -9,6 +9,7 @@ import (
 	"github.com/arijitnayak92/taskAfford/TODONEW/db"
 	"github.com/arijitnayak92/taskAfford/TODONEW/handler"
 	"github.com/arijitnayak92/taskAfford/TODONEW/utils"
+	"github.com/rs/cors"
 	//...
 )
 
@@ -29,7 +30,8 @@ func main() {
 	}
 
 	mux := handler.SetUpRouting(postgres)
+	routes := cors.New(cors.Options{AllowedMethods: []string{"GET", "POST", "DELETE", "PATCH", "OPTIONS"}}).Handler(mux)
 
 	fmt.Println("Connecting : http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", mux))
+	log.Fatal(http.ListenAndServe(":8080", routes))
 }
