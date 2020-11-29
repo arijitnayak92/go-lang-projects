@@ -4,18 +4,9 @@ import (
 	"database/sql"
 )
 
-// const createTable = `
-// DROP TABLE IF EXISTS todo;
-// Alter SEQUENCE todo_id RESTART WITH 1;
-// CREATE TABLE IF NOT EXISTS todo (
-//   ID int default nextval('todo_id'::regclass),
-//   TITLE TEXT NOT NULL,
-//   NOTE TEXT,
-//   STATUS BOOLEAN
-// );
-// `
-
 const createTable = `
+DROP TABLE IF EXISTS todo;
+Alter SEQUENCE todo_id RESTART WITH 1;
 CREATE TABLE IF NOT EXISTS todo (
   ID int default nextval('todo_id'::regclass),
   TITLE TEXT NOT NULL,
@@ -23,6 +14,15 @@ CREATE TABLE IF NOT EXISTS todo (
   STATUS BOOLEAN
 );
 `
+
+// const createTable = `
+// CREATE TABLE IF NOT EXISTS todo (
+//   ID int default nextval('todo_id'::regclass),
+//   TITLE TEXT NOT NULL,
+//   NOTE TEXT,
+//   STATUS BOOLEAN
+// );
+// `
 
 type TestDB struct {
 	db *sql.DB

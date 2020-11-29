@@ -98,6 +98,112 @@ func TestPostgres_Delete(t *testing.T) {
 	}
 }
 
+//...
+func TestPostgres_Update(t *testing.T) {
+	postgres := &Postgres{testdb.Setup()}
+	defer postgres.Close()
+
+	todo := &schema.Todo{
+		Title:  "title1",
+		Note:   "note1",
+		Status: false,
+	}
+
+	id, err := postgres.Insert(todo)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	todoUpdate := &schema.Todo{
+		Title: "title[updated]",
+		Note:  "Note Updated",
+	}
+
+	errorUpdate := postgres.Update(id, todoUpdate)
+	if errorUpdate != nil {
+		t.Fatal(errorUpdate)
+	}
+	got, errs := postgres.GetOne(id)
+	if errs != nil {
+		t.Fatal(errs)
+	}
+	want := &schema.Todo{
+		ID:     id,
+		Title:  "title[updated]",
+		Note:   "Note Updated",
+		Status: false,
+	}
+	if equal(got, want) {
+		t.Fatalf("Want: %v, Got: %v", want, got)
+	}
+}
+
+//...
+func TestPostgres_MarkAsDone(t *testing.T) {
+	postgres := &Postgres{testdb.Setup()}
+	defer postgres.Close()
+
+	todo := &schema.Todo{
+		Title:  "title1",
+		Note:   "note1",
+		Status: false,
+	}
+
+	id, err := postgres.Insert(todo)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	errorUpdate := postgres.MarkAsDone(id, true)
+	if errorUpdate != nil {
+		t.Fatal(errorUpdate)
+	}
+	got, errs := postgres.GetOne(id)
+	if errs != nil {
+		t.Fatal(errs)
+	}
+	want := &schema.Todo{
+		ID:     id,
+		Title:  "title1",
+		Note:   "note1",
+		Status: true,
+	}
+	if equal(got, want) {
+		t.Fatalf("Want: %v, Got: %v", want, got)
+	}
+}
+
+//...
+func TestPostgres_GetOne(t *testing.T) {
+	postgres := &Postgres{testdb.Setup()}
+	defer postgres.Close()
+
+	todo := &schema.Todo{
+		Title:  "title1",
+		Note:   "note1",
+		Status: false,
+	}
+
+	id, err := postgres.Insert(todo)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	got, errs := postgres.GetOne(id)
+	if errs != nil {
+		t.Fatal(errs)
+	}
+	want := &schema.Todo{
+		ID:     id,
+		Title:  "title1",
+		Note:   "note1",
+		Status: false,
+	}
+	if equal(got, want) {
+		t.Fatalf("Want: %v, Got: %v", want, got)
+	}
+}
+
 func equal(got interface{}, want interface{}) bool {
 	return reflect.DeepEqual(got, want)
 }

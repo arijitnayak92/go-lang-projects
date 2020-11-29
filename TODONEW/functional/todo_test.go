@@ -1,7 +1,6 @@
 package functioanl
 
 import (
-	// ...
 	"bytes"
 	"fmt"
 	"net/http"
@@ -60,7 +59,7 @@ func TestSaveTodo(t *testing.T) {
 	postgres := &db.Postgres{testdb.Setup()}
 	testServer := setupServer(postgres)
 
-	body := []byte(`{"id":1,"title":"My Task1","note":"","status":false}`)
+	body := []byte(`{"id":1,"title":"My Task1","note":"This is the note","status":false}`)
 
 	req, err := http.NewRequest(http.MethodPost, "http://localhost:8080/todo", bytes.NewReader(body))
 	if err != nil {
@@ -110,7 +109,7 @@ func TestDeleteTodo(t *testing.T) {
 
 	body := []byte(fmt.Sprintf(`{"id":%d}`, id))
 	var errs error
-	req, errs := http.NewRequest(http.MethodDelete, `http://localhost:8080/todos/${id}`, bytes.NewReader(body))
+	req, errs := http.NewRequest(http.MethodDelete, `http://localhost:8080/todos/#{id}`, bytes.NewReader(body))
 	if errs != nil {
 		t.Fatal(errs)
 	}
@@ -142,7 +141,7 @@ func TestUpdateTodo(t *testing.T) {
 
 	body := []byte(`{"id":1,"title":"My Task1[Updated]","note":"New Note","status":false}`)
 
-	req, err := http.NewRequest(http.MethodPut, `http://localhost:8080/todos/${body.id}`, bytes.NewReader(body))
+	req, err := http.NewRequest(http.MethodPut, `http://localhost:8080/todos/#{body.id}`, bytes.NewReader(body))
 	if err != nil {
 		t.Fatal(err)
 	}
