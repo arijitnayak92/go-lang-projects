@@ -14,17 +14,17 @@ func response(res http.ResponseWriter, req *http.Request) {
 
 //...
 func SetUpRouting(postgres *db.Postgres) *mux.Router {
-	todoHandler := &todoHandler{
+	todoHandler := &TodoHandler{
 		postgres: postgres,
 	}
 
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", response)
-	router.HandleFunc("/todos", todoHandler.getAllTodo).Methods("GET")
-	router.HandleFunc("/todos/{todo_id}", todoHandler.getOneTodo).Methods("GET")
-	router.HandleFunc("/todo", todoHandler.saveTodo).Methods("POST")
-	router.HandleFunc("/todos/{todo_id}", todoHandler.deleteTodo).Methods("DELETE")
-	router.HandleFunc("/todos/{todo_id}", todoHandler.updateTodo).Methods("PUT")
-	router.HandleFunc("/todos/{todo_id}", todoHandler.markAsDone).Methods("PATCH")
+	router.HandleFunc("/todos", todoHandler.GetAllTodo).Methods("GET")
+	router.HandleFunc("/todos/{todo_id}", todoHandler.GetOneTodo).Methods("GET")
+	router.HandleFunc("/todo", todoHandler.SaveTodo).Methods("POST")
+	router.HandleFunc("/todos/{todo_id}", todoHandler.DeleteTodo).Methods("DELETE")
+	router.HandleFunc("/todos/{todo_id}", todoHandler.UpdateTodo).Methods("PUT")
+	router.HandleFunc("/todos/{todo_id}", todoHandler.MarkAsDone).Methods("PATCH")
 	return router
 }

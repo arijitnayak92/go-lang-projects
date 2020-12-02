@@ -13,11 +13,11 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type todoHandler struct {
+type TodoHandler struct {
 	postgres *db.Postgres
 }
 
-func (handler *todoHandler) saveTodo(w http.ResponseWriter, r *http.Request) {
+func (handler *TodoHandler) SaveTodo(w http.ResponseWriter, r *http.Request) {
 	ctx := db.SetRepository(r.Context(), handler.postgres)
 
 	b, err := ioutil.ReadAll(r.Body)
@@ -60,7 +60,7 @@ func (handler *todoHandler) saveTodo(w http.ResponseWriter, r *http.Request) {
 	utils.ResponseOK(w, id)
 }
 
-func (handler *todoHandler) updateTodo(w http.ResponseWriter, r *http.Request) {
+func (handler *TodoHandler) UpdateTodo(w http.ResponseWriter, r *http.Request) {
 	ctx := db.SetRepository(r.Context(), handler.postgres)
 	params := mux.Vars(r)
 	todoID := params["todo_id"]
@@ -114,7 +114,7 @@ func (handler *todoHandler) updateTodo(w http.ResponseWriter, r *http.Request) {
 	utils.ResponseOK(w, nil)
 }
 
-func (handler *todoHandler) markAsDone(w http.ResponseWriter, r *http.Request) {
+func (handler *TodoHandler) MarkAsDone(w http.ResponseWriter, r *http.Request) {
 	ctx := db.SetRepository(r.Context(), handler.postgres)
 	params := mux.Vars(r)
 	todoID := params["todo_id"]
@@ -163,7 +163,7 @@ func (handler *todoHandler) markAsDone(w http.ResponseWriter, r *http.Request) {
 	utils.ResponseOK(w, nil)
 }
 
-func (handler *todoHandler) deleteTodo(w http.ResponseWriter, r *http.Request) {
+func (handler *TodoHandler) DeleteTodo(w http.ResponseWriter, r *http.Request) {
 	ctx := db.SetRepository(r.Context(), handler.postgres)
 
 	params := mux.Vars(r)
@@ -189,7 +189,7 @@ func (handler *todoHandler) deleteTodo(w http.ResponseWriter, r *http.Request) {
 	utils.ResponseOK(w, nil)
 }
 
-func (handler *todoHandler) getAllTodo(w http.ResponseWriter, r *http.Request) {
+func (handler *TodoHandler) GetAllTodo(w http.ResponseWriter, r *http.Request) {
 	ctx := db.SetRepository(r.Context(), handler.postgres)
 
 	todoList, err := service.GetAll(ctx)
@@ -205,7 +205,7 @@ func (handler *todoHandler) getAllTodo(w http.ResponseWriter, r *http.Request) {
 	utils.ResponseOK(w, todoList)
 }
 
-func (handler *todoHandler) getOneTodo(w http.ResponseWriter, r *http.Request) {
+func (handler *TodoHandler) GetOneTodo(w http.ResponseWriter, r *http.Request) {
 	ctx := db.SetRepository(r.Context(), handler.postgres)
 	params := mux.Vars(r)
 	todoID := params["todo_id"]

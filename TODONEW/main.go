@@ -9,10 +9,17 @@ import (
 	"github.com/arijitnayak92/taskAfford/TODONEW/db"
 	"github.com/arijitnayak92/taskAfford/TODONEW/handler"
 	"github.com/arijitnayak92/taskAfford/TODONEW/utils"
+	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 	//...
 )
 
+func init() {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+}
 func main() {
 	var postgres *db.Postgres
 	var err *utils.APIError

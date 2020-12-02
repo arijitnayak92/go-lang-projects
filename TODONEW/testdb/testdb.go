@@ -2,6 +2,7 @@ package testdb
 
 import (
 	"database/sql"
+	"os"
 )
 
 const createTable = `
@@ -42,7 +43,7 @@ func Setup() *sql.DB {
 }
 
 func connectPostgresForTests() (*sql.DB, error) {
-	connStr := "postgres://sdxlaekjnjhlxu:b0493e3465956df4b0645747ace1a8df23377addbe929148148cebe263bd2fa5@ec2-54-157-88-70.compute-1.amazonaws.com:5432/d2nlmudsli8cmv"
+	connStr := os.Getenv("POSTGRES_URI")
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		return nil, err
