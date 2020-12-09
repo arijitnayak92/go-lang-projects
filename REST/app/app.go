@@ -1,10 +1,7 @@
 package app
 
 import (
-	"log"
-
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
 var (
@@ -14,10 +11,6 @@ var (
 func init() {
 	gin.SetMode(gin.ReleaseMode)
 	router = gin.Default()
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatalf("Error loading .env file")
-	}
 }
 
 func StartApp() {
