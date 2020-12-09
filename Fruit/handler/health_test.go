@@ -2,12 +2,12 @@ package handler
 
 import (
 	"encoding/json"
+	"github.com/arijitnayak92/taskAfford/Fruit/appcontext"
+	"github.com/arijitnayak92/taskAfford/Fruit/domain"
+	"github.com/arijitnayak92/taskAfford/Fruit/mock"
+	"github.com/arijitnayak92/taskAfford/Fruit/util"
+	"github.com/arijitnayak92/taskAfford/Fruit/validation"
 	"github.com/gin-gonic/gin"
-	"gitlab.com/affordmed/affmed/appcontext"
-	"gitlab.com/affordmed/affmed/domain"
-	"gitlab.com/affordmed/affmed/mock"
-	"gitlab.com/affordmed/affmed/util"
-	"gitlab.com/affordmed/affmed/validation"
 	"net/http"
 	"net/http/httptest"
 	"testing"

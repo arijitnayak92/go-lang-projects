@@ -2,17 +2,14 @@ package db
 
 import (
 	"database/sql"
-	"gitlab.com/affordmed/affmed/appcontext"
 	"log"
+
+	"github.com/arijitnayak92/taskAfford/Fruit/appcontext"
+	"github.com/arijitnayak92/taskAfford/Fruit/utils"
 )
 
-type PostgresClient interface {
-	Exec(query string, args ...interface{}) (sql.Result, error)
-	QueryRow(query string, args ...interface{}) *sql.Row
-	Ping() error
-}
-
 type Postgres struct {
+	DB *sql.DB
 }
 
 func NewPostgres(appCtx *appcontext.AppContext) (*sql.DB, error) {
@@ -23,4 +20,18 @@ func NewPostgres(appCtx *appcontext.AppContext) (*sql.DB, error) {
 	}
 
 	return DB, err
+}
+
+//...
+func (repo *MainDB) PingPostgres() *utils.APIError {
+
+	err := repo.Postgres.DB.Ping()
+
+	if err != nil {
+		return &utils.APIError{
+			Message:    "Failed to ping DB !",
+			StatusCode: 400,
+		}
+	}
+	return nil
 }

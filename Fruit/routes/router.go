@@ -1,8 +1,8 @@
 package routes
 
 import (
+	"github.com/arijitnayak92/taskAfford/Fruit/handler"
 	"github.com/gin-gonic/gin"
-	"gitlab.com/affordmed/affmed/handler"
 )
 
 /*
@@ -28,24 +28,6 @@ func NewRoutes(h handler.AppHandler) Routes {
 			"GET",
 			"/health",
 			h.HealthHandler,
-		},
-		Route{
-			"Sign In",
-			"POST",
-			"/signin",
-			h.SignInHandler,
-		},
-		Route{
-			Name:        "Change Password",
-			Method:      "PATCH",
-			Pattern:     "/users/:email/password",
-			HandlerFunc: h.ChangePasswordHandler,
-		},
-		Route{
-			Name:        "Create Product Category",
-			Method:      "POST",
-			Pattern:     "/category",
-			HandlerFunc: h.CreateCategoryHandler,
 		},
 	}
 
