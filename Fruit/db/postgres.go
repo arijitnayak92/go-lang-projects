@@ -23,7 +23,7 @@ func NewPostgres(appCtx *appcontext.AppContext) (*sql.DB, error) {
 }
 
 //...
-func (repo *MainDB) PingPostgres() *utils.APIError {
+func (repo *DB) PingPostgres() *utils.APIError {
 
 	err := repo.Postgres.DB.Ping()
 

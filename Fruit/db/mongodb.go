@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 
+	"github.com/arijitnayak92/taskAfford/Fruit/appcontext"
 	"github.com/arijitnayak92/taskAfford/Fruit/utils"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -12,9 +13,8 @@ type Mongo struct {
 	DB *mongo.Client
 }
 
-// To connect to the mongo instance ...
-func MongoDBConection(connStr string) (*mongo.Client, *utils.APIError) {
-	clientOptions := options.Client().ApplyURI(connStr)
+func NewMongo(appCtx *appcontext.AppContext) (*mongo.Client, *utils.APIError) {
+	clientOptions := options.Client().ApplyURI(appCtx.MongoURI)
 
 	// Connect to MongoDB
 	client, err := mongo.Connect(context.TODO(), clientOptions)
@@ -29,7 +29,7 @@ func MongoDBConection(connStr string) (*mongo.Client, *utils.APIError) {
 }
 
 // To check connection status of mongo db ...
-func (repo *MainDB) CheckMongoAlive() *utils.APIError {
+func (repo *DB) CheckMongoAlive() *utils.APIError {
 	err := repo.Mongo.DB.Ping(context.TODO(), nil)
 
 	if err != nil {

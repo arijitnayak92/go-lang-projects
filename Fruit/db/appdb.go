@@ -13,7 +13,7 @@ func init() {
 	godotenv.Load(".env")
 }
 
-// AppRepository ...
+// AppDB ...
 type AppDB interface {
 	PingPostgres() *utils.APIError
 	CheckMongoAlive() *utils.APIError
@@ -24,12 +24,12 @@ type DB struct {
 	Mongo    *Mongo
 }
 
-func NewDB(postgres *sql.DB, mongo *mongo.Client) *MainDB {
-	return &MainDB{
+func NewDB(postgres *sql.DB, mongo *mongo.Client) *DB {
+	return &DB{
 		Postgres: &Postgres{
 			DB: postgres,
 		},
-		Mongo: &MongoStruct{
+		Mongo: &Mongo{
 			DB: mongo,
 		},
 	}

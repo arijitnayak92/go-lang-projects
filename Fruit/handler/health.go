@@ -6,22 +6,39 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-/*
-HealthHandler returns alive status
-*/
+//...
 func (h *Handler) HealthHandler(c *gin.Context) {
 	postgresDBStatus := h.domain.GetPostgresHealth()
 	mongoDBStatus := h.domain.GetMongoHealth()
-	if postgresDBStatus && mongoDBStatus {
-		c.JSON(http.StatusOK, gin.H{
-			"alive":     true,
-			"db_status": "connected",
+
+	if !mongoDBStatus && !postgresDBStatus {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"mongoIsAlive":    false,
+			"postgresIsAlive": false,
+			"server":          true,
+		})
+		return
+	}
+	if mongoDBStatus && !postgresDBStatus {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"mongoIsAlive":    true,
+			"postgresIsAlive": false,
+			"serverIsAlive":   true,
 		})
 		return
 	}
 
-	c.JSON(http.StatusInternalServerError, gin.H{
-		"alive":         true,
-		"postgresAlive": postgresDBStatus,
+	if !mongoDBStatus && postgresDBStatus {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"mongoIsAlive":    false,
+			"postgresIsAlive": true,
+			"serverIsAlive":   true,
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"mongoIsAlive":    true,
+		"postgresIsAlive": true,
+		"serverIsAlive":   true,
 	})
 }

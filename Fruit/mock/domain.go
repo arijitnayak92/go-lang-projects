@@ -1,34 +1,30 @@
 package mock
 
 import (
-	"database/sql"
-	"gitlab.com/affordmed/affmed/appcontext"
-	"gitlab.com/affordmed/affmed/model"
-	"gitlab.com/affordmed/affmed/util"
+	"github.com/arijitnayak92/taskAfford/Fruit/appcontext"
+	"github.com/arijitnayak92/taskAfford/Fruit/db"
+	"github.com/stretchr/testify/mock"
 )
 
 type Domain struct {
 	appCtx *appcontext.AppContext
-	pg     *sql.DB
-	util   util.AppUtil
+	appDB  db.AppDB
 }
 
-func NewDomain(appCtx *appcontext.AppContext, pg *sql.DB, util util.AppUtil) *Domain {
-	return &Domain{appCtx: appCtx, pg: pg, util: util}
+func NewDomain(appCtx *appcontext.AppContext, appDB db.AppDB) *Domain {
+	return &Domain{appCtx: appCtx, appDB: appDB}
 }
 
 func (d *Domain) GetPostgresHealth() bool {
 	return true
 }
 
-func (d *Domain) SignInUser(email, password string) error {
-	return nil
+type MockDomain struct {
+	mock.Mock
 }
 
-func (d *Domain) ChangePassword(email, password string) error {
-	return nil
-}
+func (mock *MockDomain) GetMongoHealth() (error, error) {
+	args := mock.Called()
 
-func (d *Domain) GetUserByEmail(email string) (*model.User, error) {
-	return model.NewUser("captain@avengers.com", "avengers assemble", "::1", false), nil
+	return args.Error(0), args.Error(1)
 }

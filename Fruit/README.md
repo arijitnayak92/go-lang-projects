@@ -1,1 +1,1 @@
-Golang Web application for Afford Med
+Fruit Seller App

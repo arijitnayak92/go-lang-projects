@@ -5,41 +5,31 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-/*
-Route Structure of new routes
-*/
-type Route struct {
-	Name        string
-	Method      string
-	Pattern     string
-	HandlerFunc gin.HandlerFunc
+type Router struct {
+	Router  *gin.Engine
+	Handler handler.AppHandler
 }
 
-/*
-Routes Array of all available routes
-*/
-type Routes []Route
-
-// NewRoutes returns all the routes
-func NewRoutes(h handler.AppHandler) Routes {
-	var routes = Routes{
-		Route{
-			"Health",
-			"GET",
-			"/health",
-			h.HealthHandler,
-		},
-	}
-
-	return routes
+type AppRouter interface {
+	Routes() *gin.Engine
 }
 
-/*
-AttachRoutes Attaches routes to the provided server
-*/
-func AttachRoutes(server *gin.Engine, routes Routes) {
-	for _, route := range routes {
-		server.
-			Handle(route.Method, route.Pattern, route.HandlerFunc)
+//...
+func NewRouter(h handler.AppHandler) Router {
+	rt := gin.Default()
+	return Router{
+		Router:  rt,
+		Handler: h,
 	}
+}
+
+func init() {
+	gin.SetMode(gin.ReleaseMode)
+}
+
+//"Routes ..."
+func (r *Router) Routes() (*gin.Engine, gin.RoutesInfo) {
+	r.Router.GET("/", r.Handler.HealthHandler)
+	routesInfo := r.Router.Routes()
+	return r.Router, routesInfo
 }

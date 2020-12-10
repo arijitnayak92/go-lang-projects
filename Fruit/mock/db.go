@@ -1,22 +1,34 @@
 package mock
 
-import "database/sql"
+import "github.com/arijitnayak92/taskAfford/Fruit/utils"
 
 type Postgres struct {
+}
+
+type Mongo struct {
+}
+
+type AppDB struct {
+	pg    *Postgres
+	mongo *Mongo
 }
 
 func NewPostgres() *Postgres {
 	return &Postgres{}
 }
 
-func (p *Postgres) Exec(_ string, _ ...interface{}) (sql.Result, error) {
-	return nil, nil
+func NewMongo() *Mongo {
+	return &Mongo{}
 }
 
-func (p *Postgres) QueryRow(_ string, _ ...interface{}) *sql.Row {
+func NewDB(pg *Postgres, mongo *Mongo) *AppDB {
+	return &AppDB{pg: pg, mongo: mongo}
+}
+
+func (mock *AppDB) PingPostgres() *utils.APIError {
 	return nil
 }
 
-func (p *Postgres) Ping() error {
+func (mock *AppDB) CheckMongoAlive() *utils.APIError {
 	return nil
 }

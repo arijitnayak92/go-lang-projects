@@ -1,20 +1,24 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
-	"time"
 
 	"github.com/arijitnayak92/taskAfford/Fruit/appcontext"
 	"github.com/arijitnayak92/taskAfford/Fruit/db"
 	"github.com/arijitnayak92/taskAfford/Fruit/domain"
 	"github.com/arijitnayak92/taskAfford/Fruit/handler"
 	"github.com/arijitnayak92/taskAfford/Fruit/routes"
-	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 
-	// Postgres driver
 	_ "github.com/lib/pq"
+)
+
+var (
+	port        string
+	postgresURI string
+	mongoURI    string
 )
 
 func init() {
@@ -22,11 +26,23 @@ func init() {
 	if err != nil {
 		log.Println("error loading .env file")
 	}
+
+	flag.StringVar(&port, "port", ":8080", "server port")
+
+	postgresURI = os.Getenv("POSTGRES_URI")
+	if postgresURI == "" {
+		log.Fatal("Postgres URI not found!")
+	}
+
+	mongoURI = os.Getenv("MONGODB_URI")
+	if mongoURI == "" {
+		log.Fatal("Mongo URI not found!")
+	}
 }
 
 func main() {
-	server := gin.Default()
-	appContext := appcontext.NewAppContext(postgresURI)
+
+	appContext := appcontext.NewAppContext(postgresURI, mongoURI)
 
 	pg, err := db.NewPostgres(appContext)
 	if err != nil {
@@ -34,31 +50,20 @@ func main() {
 		return
 	}
 	defer pg.Close()
-	mongouri := os.Getenv("MONGODB_URI")
-	mongoClient, mongoError := db.MongoDBConection(mongouri)
+
+	mongoClient, mongoError := db.NewMongo(appContext)
 	if mongoError != nil {
 		log.Println(mongoError)
 	}
 	appDB := db.NewDB(pg, mongoClient)
+
 	d := domain.NewDomain(appContext, appDB)
 	h := handler.NewHandler(appContext, d)
-	r := routes.NewRoutes(h)
+	r := routes.NewRouter(h)
+	router, _ := r.Routes()
 
-	routes.AttachRoutes(server, r)
+	log.Printf("Server Running on port %s", port)
 
-	log.Printf("the server is now running on port %s", port)
-	go func() {
-		errc <- server.Run(port)
-	}()
+	router.Run(port)
 
-	select {
-	case err := <-errc:
-		log.Printf("ListenAndServe error: %v", err)
-	case <-done:
-		log.Println("shutting down server ...")
-	}
-	time.AfterFunc(1*time.Second, func() {
-		close(done)
-		close(errc)
-	})
 }

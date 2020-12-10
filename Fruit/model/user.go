@@ -1,12 +1,10 @@
 package model
 
 type User struct {
-	Email             string
-	Password          string
-	LoginIP           string
-	IsPasswordChanged bool
+	Email    string
+	Password string
 }
 
-func NewUser(email string, password string, loginIP string, isPasswordChanged bool) *User {
-	return &User{Email: email, Password: password, LoginIP: loginIP, IsPasswordChanged: isPasswordChanged}
+func NewUser(email string, password string) *User {
+	return &User{Email: email, Password: password}
 }
