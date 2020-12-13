@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/arijitnayak92/taskAfford/Fruit/appcontext"
-	"github.com/arijitnayak92/taskAfford/Fruit/utils"
 )
 
 type Postgres struct {
@@ -20,18 +19,4 @@ func NewPostgres(appCtx *appcontext.AppContext) (*sql.DB, error) {
 	}
 
 	return DB, err
-}
-
-//...
-func (repo *DB) PingPostgres() *utils.APIError {
-
-	err := repo.Postgres.DB.Ping()
-
-	if err != nil {
-		return &utils.APIError{
-			Message:    "Failed to ping DB !",
-			StatusCode: 400,
-		}
-	}
-	return nil
 }

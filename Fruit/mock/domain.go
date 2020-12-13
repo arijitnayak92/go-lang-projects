@@ -1,30 +1,40 @@
 package mock
 
 import (
-	"github.com/arijitnayak92/taskAfford/Fruit/appcontext"
-	"github.com/arijitnayak92/taskAfford/Fruit/db"
+	"github.com/arijitnayak92/taskAfford/Fruit/model"
 	"github.com/stretchr/testify/mock"
 )
 
+// MockDomain struct containing testify mock
 type Domain struct {
-	appCtx *appcontext.AppContext
-	appDB  db.AppDB
-}
-
-func NewDomain(appCtx *appcontext.AppContext, appDB db.AppDB) *Domain {
-	return &Domain{appCtx: appCtx, appDB: appDB}
-}
-
-func (d *Domain) GetPostgresHealth() bool {
-	return true
-}
-
-type MockDomain struct {
 	mock.Mock
 }
 
-func (mock *MockDomain) GetMongoHealth() (error, error) {
+func (mock *Domain) GetPostgresHealth() bool {
 	args := mock.Called()
 
-	return args.Error(0), args.Error(1)
+	return args.Bool(0)
+}
+
+func (mock *Domain) GetMongoHealth() bool {
+	args := mock.Called()
+
+	return args.Bool(0)
+}
+
+func (mock *Domain) UserSignup(email string, password string, firstname string, lastname string, role string) (bool, error) {
+	args := mock.Called(email, password, firstname, lastname, role)
+	return args.Bool(0), args.Error(1)
+}
+
+func (mock *Domain) GetUser(email string) (*model.User, error) {
+	args := mock.Called(email)
+	result := args.Get(0)
+	return result.(*model.User), args.Error(1)
+}
+
+func (mock *Domain) Login(email string, password string) (string, error) {
+	args := mock.Called(email, password)
+
+	return args.String(0), args.Error(1)
 }

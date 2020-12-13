@@ -10,6 +10,8 @@ import (
 	"github.com/arijitnayak92/taskAfford/Fruit/domain"
 	"github.com/arijitnayak92/taskAfford/Fruit/handler"
 	"github.com/arijitnayak92/taskAfford/Fruit/routes"
+	"github.com/arijitnayak92/taskAfford/Fruit/utils"
+	"github.com/arijitnayak92/taskAfford/Fruit/validation"
 	"github.com/joho/godotenv"
 
 	_ "github.com/lib/pq"
@@ -22,10 +24,7 @@ var (
 )
 
 func init() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("error loading .env file")
-	}
+	godotenv.Load()
 
 	flag.StringVar(&port, "port", ":8080", "server port")
 
@@ -55,10 +54,12 @@ func main() {
 	if mongoError != nil {
 		log.Println(mongoError)
 	}
-	appDB := db.NewDB(pg, mongoClient)
 
-	d := domain.NewDomain(appContext, appDB)
-	h := handler.NewHandler(appContext, d)
+	u := utils.NewUtil()
+	v := validation.NewValidation(u)
+
+	d := domain.NewDomain(appContext, pg, mongoClient, u)
+	h := handler.NewHandler(appContext, d, v, u)
 	r := routes.NewRouter(h)
 	router, _ := r.Routes()
 

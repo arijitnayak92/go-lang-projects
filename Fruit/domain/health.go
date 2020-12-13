@@ -1,23 +1,27 @@
 package domain
 
-import "log"
+import (
+	"context"
 
+	"go.mongodb.org/mongo-driver/mongo/readpref"
+)
+
+// CheckDatabaseHealth ...
 func (d *Domain) GetPostgresHealth() bool {
-	err := d.appDB.PingPostgres()
+	err := d.appPgDB.Ping()
+
 	if err != nil {
-		log.Println("Cannot connect to Postgres Database", err)
 		return false
 	}
-
 	return true
 }
 
+// CheckDatabaseHealth ...
 func (d *Domain) GetMongoHealth() bool {
-	err := d.appDB.CheckMongoAlive()
+	err := d.appMongoDB.Ping(context.Background(), readpref.Primary())
+
 	if err != nil {
-		log.Println("Cannot connect to Postgres Database", err)
 		return false
 	}
-
 	return true
 }

@@ -1,0 +1,62 @@
+image: golang:1.15-alpine
+
+stages:
+  - test
+  - build
+
+variables:
+  EXEC_NAME: "cart-management-service"
+  GO_PATH: "/go/src/cart-management-service"
+  GOCACHE: "/go/src/cart-management-service/.gocache"
+  CGO_ENABLED: 0
+
+cache:
+  paths:
+    - .gocache/
+
+before_script:
+  - apk --no-cache -q add git openssh-client bind-tools curl
+  - eval $(ssh-agent -s)
+  - mkdir -p $(dirname $GO_PATH)
+  - ln -sf $CI_PROJECT_DIR $GO_PATH
+  - cd $GO_PATH
+
+go-formatting:
+  stage: test
+  script:
+    - if [[ !$(go vet -composites=false $(go list ./... | grep -v vendor)) ]];
+      then echo "Pass go vet";
+      else exit 1;
+      fi
+
+go-lint:
+  stage: test
+  script:
+    - go get -u golang.org/x/lint/golint
+    - golint -set_exit_status $(go list ./... | grep -v vendor)
+
+go-test:
+  stage: test
+  script:
+    - apk add bc
+    - go test -cover  ./... -coverprofile=/tmp/coverage.out -v
+    - test_coverage=$(go tool cover -func=/tmp/coverage.out | tail -1 |awk '{print $3}'| tr -d '%') # gives pure coverage value
+    - echo "Code coverage is ${test_coverage}"
+    - if [[ 1 -eq $(echo ${TEST_COVERAGE}'<'$test_coverage  | bc -l) ]];
+      then echo "Pass tests and coverage is over ${TEST_COVERAGE}%";
+      else echo "Pass tests but coverage is under ${TEST_COVERAGE}%"; exit 1;
+      fi
+    - echo "Download coverage.out and execute `go tool cover -html=coverage.out`"
+  artifacts:
+    paths:
+      - /tmp/coverage.out
+    expire_in: 30 days
+
+go-build:
+  stage: build
+  variables:
+    GOOS: linux
+    GOARCH: 386
+  script:
+    - go build -ldflags "-s -w -X main.BuildRevision=$CI_COMMIT_SHA -X main.BuildVersion=$CI_COMMIT_TAG -X main.BuildTime=$(date --utc +%Y-%m-%dT%H:%M:%SZ)" -o bin/${EXEC_NAME} main.go
+    - chmod a+x bin/*
