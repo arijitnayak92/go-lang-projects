@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -15,8 +16,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func executeRequest(r http.Handler, method, path string) *httptest.ResponseRecorder {
-	req, _ := http.NewRequest(method, path, nil)
+func executeRequest(r http.Handler, method, path string, body io.Reader) *httptest.ResponseRecorder {
+	req, _ := http.NewRequest(method, path, body)
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 	return w
@@ -50,7 +51,7 @@ func TestHandler_GetAppHealth(t *testing.T) {
 		router := gin.Default()
 		router.GET("/", testHandler.HealthHandler)
 
-		w := executeRequest(router, "GET", "/")
+		w := executeRequest(router, "GET", "/", nil)
 
 		mockDomain.AssertExpectations(t)
 
@@ -84,7 +85,7 @@ func TestHandler_GetAppHealth(t *testing.T) {
 		router := gin.Default()
 		router.GET("/", testHandler.HealthHandler)
 
-		w := executeRequest(router, "GET", "/")
+		w := executeRequest(router, "GET", "/", nil)
 
 		mockDomain.AssertExpectations(t)
 
@@ -119,7 +120,7 @@ func TestHandler_GetAppHealth(t *testing.T) {
 		router := gin.Default()
 		router.GET("/", testHandler.HealthHandler)
 
-		w := executeRequest(router, "GET", "/")
+		w := executeRequest(router, "GET", "/", nil)
 		mockDomain.AssertExpectations(t)
 
 		assert.Equal(t, http.StatusInternalServerError, w.Code)
@@ -153,7 +154,7 @@ func TestHandler_GetAppHealth(t *testing.T) {
 		router := gin.Default()
 		router.GET("/", testHandler.HealthHandler)
 
-		w := executeRequest(router, "GET", "/")
+		w := executeRequest(router, "GET", "/", nil)
 
 		mockDomain.AssertExpectations(t)
 

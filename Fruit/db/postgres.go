@@ -7,10 +7,7 @@ import (
 	"github.com/arijitnayak92/taskAfford/Fruit/appcontext"
 )
 
-type Postgres struct {
-	DB *sql.DB
-}
-
+// NewPostgres ...
 func NewPostgres(appCtx *appcontext.AppContext) (*sql.DB, error) {
 	DB, err := sql.Open("postgres", appCtx.PostgresURI)
 	if err != nil {

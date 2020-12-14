@@ -7,12 +7,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"gitlab.com/affordmed/fruit-seller-b-backend/apperrors"
-	mocks "gitlab.com/affordmed/fruit-seller-b-backend/mocks/domain"
+	"github.com/arijitnayak92/taskAfford/Fruit2/apperrors"
+	mocks "github.com/arijitnayak92/taskAfford/Fruit2/mocks/domain"
 
+	"github.com/arijitnayak92/taskAfford/Fruit2/domain"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/affordmed/fruit-seller-b-backend/domain"
 )
 
 func executeRequest(r http.Handler, method, path string, body io.Reader) *httptest.ResponseRecorder {
@@ -40,13 +40,11 @@ func TestHandler_GetAppHealth(t *testing.T) {
 
 		testHandler := NewHandler(mockDomain)
 
-		// appRouter := routes.NewRouter()
-		// appRouter.SetupRoutes(testHandler)
 		router := gin.Default()
-		router.GET("/v1/api/health", testHandler.GetAppHealth)
+		router.GET("/health", testHandler.GetAppHealth)
 
-		w := executeRequest(router, "GET", "/v1/api/health", nil)
-		// testHandler.GetAppHealth()
+		w := executeRequest(router, "GET", "/health", nil)
+
 		mockDomain.AssertExpectations(t)
 
 		assert.Equal(t, http.StatusOK, w.Code)
@@ -77,9 +75,9 @@ func TestHandler_GetAppHealth(t *testing.T) {
 		testHandler := NewHandler(mockDomain)
 
 		router := gin.Default()
-		router.GET("/v1/api/health", testHandler.GetAppHealth)
+		router.GET("/health", testHandler.GetAppHealth)
 
-		w := executeRequest(router, "GET", "/v1/api/health", nil)
+		w := executeRequest(router, "GET", "/health", nil)
 
 		mockDomain.AssertExpectations(t)
 
@@ -110,13 +108,10 @@ func TestHandler_GetAppHealth(t *testing.T) {
 
 		testHandler := NewHandler(mockDomain)
 
-		// appRouter := routes.NewRouter()
-		// appRouter.SetupRoutes(testHandler)
 		router := gin.Default()
-		router.GET("/v1/api/health", testHandler.GetAppHealth)
+		router.GET("/health", testHandler.GetAppHealth)
 
-		w := executeRequest(router, "GET", "/v1/api/health", nil)
-		// testHandler.GetAppHealth()
+		w := executeRequest(router, "GET", "/health", nil)
 		mockDomain.AssertExpectations(t)
 
 		assert.Equal(t, http.StatusInternalServerError, w.Code)
@@ -146,13 +141,10 @@ func TestHandler_GetAppHealth(t *testing.T) {
 
 		testHandler := NewHandler(mockDomain)
 
-		// appRouter := routes.NewRouter()
-		// appRouter.SetupRoutes(testHandler)
 		router := gin.Default()
-		router.GET("/v1/api/health", testHandler.GetAppHealth)
+		router.GET("/health", testHandler.GetAppHealth)
 
-		w := executeRequest(router, "GET", "/v1/api/health", nil)
-		// testHandler.GetAppHealth()
+		w := executeRequest(router, "GET", "/health", nil)
 		mockDomain.AssertExpectations(t)
 
 		assert.Equal(t, http.StatusInternalServerError, w.Code)

@@ -3,10 +3,10 @@ package handler
 import (
 	"net/http"
 
+	"github.com/arijitnayak92/taskAfford/Fruit2/apperrors"
+	"github.com/arijitnayak92/taskAfford/Fruit2/domain"
+	"github.com/arijitnayak92/taskAfford/Fruit2/models"
 	"github.com/gin-gonic/gin"
-	"gitlab.com/affordmed/fruit-seller-b-backend/apperrors"
-	"gitlab.com/affordmed/fruit-seller-b-backend/domain"
-	"gitlab.com/affordmed/fruit-seller-b-backend/models"
 )
 
 // UserHandler : UserHandler Interface.
@@ -38,14 +38,12 @@ func (u *User) AddUser(c *gin.Context) {
 		return
 	}
 
-	//log.Println(user)
-
-	email, err := u.domain.AddUser(user)
+	_, err := u.domain.AddUser(user)
 	if err != nil {
 		apperrors.ErrorResponse(err, c)
 		return
 	}
-	message := email + " added successfully!!"
+	message := "Successfully SignedUp!!"
 	c.JSON(http.StatusOK, gin.H{
 		"message": message,
 	})

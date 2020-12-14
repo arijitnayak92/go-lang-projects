@@ -3,11 +3,11 @@ package main
 import (
 	"log"
 
+	"github.com/arijitnayak92/taskAfford/Fruit2/db"
+	"github.com/arijitnayak92/taskAfford/Fruit2/domain"
+	"github.com/arijitnayak92/taskAfford/Fruit2/handler"
+	"github.com/arijitnayak92/taskAfford/Fruit2/routes"
 	"github.com/joho/godotenv"
-	"gitlab.com/affordmed/fruit-seller-b-backend/db"
-	"gitlab.com/affordmed/fruit-seller-b-backend/domain"
-	"gitlab.com/affordmed/fruit-seller-b-backend/handler"
-	"gitlab.com/affordmed/fruit-seller-b-backend/routes"
 )
 
 func main() {

@@ -16,9 +16,7 @@ func TestNewDomain(t *testing.T) {
 	var mongo db.AppMongo
 	var util utils.AppUtil
 	newDomain := NewDomain(appCtx, pg, mongo, util)
-	var want db.Postgres
-	want = nil
-	if newDomain.appPgDB != want {
+	if newDomain.appMongoDB != nil {
 		t.Errorf("error in NewDomain() constructor")
 	}
 
@@ -30,16 +28,14 @@ var databaseHealthCheck func() error
 type appsDomainMock struct{}
 
 func TestGetPostgresHealth(t *testing.T) {
-	var appCtx *appcontext.AppContext
+	appCtx := appcontext.NewAppContext("postgres uri", "mongo uri")
 	var util utils.AppUtil
-	mockRepo := new(mock.Postgres)
+	pg := mock.NewPostgres(nil)
 	mockRepoMongo := new(mock.Mongo)
-	mockRepo.On("Ping").Return(nil)
 
-	testDomain := NewDomain(appCtx, mockRepo, mockRepoMongo, util)
+	testDomain := NewDomain(appCtx, pg, mockRepoMongo, util)
 
 	postgresErr := testDomain.GetPostgresHealth()
-	mockRepo.AssertExpectations(t)
 
 	if postgresErr == false {
 		t.Errorf("DatabaseHealthCheck not throwing error")
@@ -48,35 +44,33 @@ func TestGetPostgresHealth(t *testing.T) {
 }
 
 func TestGetPostgresHealthError(t *testing.T) {
-	var appCtx *appcontext.AppContext
-	var util utils.AppUtil
-	mockRepo := new(mock.Postgres)
-	mockRepoMongo := new(mock.Mongo)
 	errPostgresConnection := errors.New("Unable to connect to the Postgres database")
-	mockRepo.On("Ping").Return(errPostgresConnection)
+	appCtx := appcontext.NewAppContext("postgres uri", "mongo uri")
+	var util utils.AppUtil
+	pg := mock.NewPostgres(errPostgresConnection)
+	mockRepoMongo := new(mock.Mongo)
 
-	testDomain := NewDomain(appCtx, mockRepo, mockRepoMongo, util)
+	testDomain := NewDomain(appCtx, pg, mockRepoMongo, util)
 
 	postgresErr := testDomain.GetPostgresHealth()
-	mockRepo.AssertExpectations(t)
 
-	if postgresErr != false {
+	if postgresErr == true {
 		t.Errorf("DatabaseHealthCheck not throwing error")
 	}
 
 }
 
 func TestGetMongoHealth(t *testing.T) {
-	var appCtx *appcontext.AppContext
+	appCtx := appcontext.NewAppContext("postgres uri", "mongo uri")
 	var util utils.AppUtil
-	mockRepo := new(mock.Postgres)
+	mockRepo := mock.NewPostgres(nil)
 	mockRepoMongo := new(mock.Mongo)
 	mockRepoMongo.On("Ping").Return(nil)
 
 	testDomain := NewDomain(appCtx, mockRepo, mockRepoMongo, util)
 
 	postgresErr := testDomain.GetMongoHealth()
-	mockRepo.AssertExpectations(t)
+	mockRepoMongo.AssertExpectations(t)
 
 	if postgresErr == false {
 		t.Errorf("DatabaseHealthCheck not throwing error")
@@ -85,9 +79,9 @@ func TestGetMongoHealth(t *testing.T) {
 }
 
 func TestGetMongoHealthError(t *testing.T) {
-	var appCtx *appcontext.AppContext
+	appCtx := appcontext.NewAppContext("postgres uri", "mongo uri")
 	var util utils.AppUtil
-	mockRepo := new(mock.Postgres)
+	mockRepo := mock.NewPostgres(nil)
 	mockRepoMongo := new(mock.Mongo)
 	errPostgresConnection := errors.New("Unable to connect to the Postgres database")
 	mockRepoMongo.On("Ping").Return(errPostgresConnection)
@@ -95,40 +89,10 @@ func TestGetMongoHealthError(t *testing.T) {
 	testDomain := NewDomain(appCtx, mockRepo, mockRepoMongo, util)
 
 	postgresErr := testDomain.GetMongoHealth()
-	mockRepo.AssertExpectations(t)
+	mockRepoMongo.AssertExpectations(t)
 
 	if postgresErr != false {
 		t.Errorf("DatabaseHealthCheck not throwing error")
 	}
 
 }
-
-// func TestGetUser(t *testing.T) {
-// 	testuser := &model.User{
-// 		Email:     "abc@gmail.com",
-// 		Password:  "Arijitnayak@92",
-// 		FirstName: "Arijit",
-// 		LastName:  "Nayak",
-// 		Role:      "User",
-// 		CartID:    "",
-// 	}
-// 	// var user *model.User
-// 	var appCtx *appcontext.AppContext
-// 	var util utils.AppUtil
-// 	mockRepo := new(mock.AppPostgresDB)
-// 	mockRepoMongo := new(mock.AppMongoDB)
-// 	//mockDomain := new(mock.Domain)
-// 	errP := errors.New("Not found")
-// 	query := "SELECT * FROM users WHERE email =$1"
-// 	mockRepo.On("QueryRow", query, testuser.Email).Return(nil, errP)
-//
-// 	//mockDomain.On("GetUser", testuser.Email).Return(nil, errP)
-// 	testDomain := NewDomain(appCtx, mockRepo, mockRepoMongo, util)
-//
-// 	_, err := testDomain.GetUser(testuser.Email)
-// 	mockRepo.AssertExpectations(t)
-// 	if err != nil {
-// 		t.Errorf("DatabaseHealthCheck not throwing error")
-// 	}
-//
-// }

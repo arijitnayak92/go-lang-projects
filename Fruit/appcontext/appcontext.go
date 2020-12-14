@@ -6,7 +6,7 @@ type AppContext struct {
 	MongoURI    string
 }
 
-// NewAppContext returns new instance of AppContext
+// NewAppContext ...
 func NewAppContext(postgresURI string, mongoURI string) *AppContext {
 	return &AppContext{PostgresURI: postgresURI, MongoURI: mongoURI}
 }

@@ -37,7 +37,7 @@ func TestRoutes(t *testing.T) {
 	t.Run("Testing Url Mapping Function...", func(t *testing.T) {
 		_, rd := router.Routes()
 		got := len(rd)
-		want := 2
+		want := 3
 		if got != want {
 			t.Errorf("Routes() Method Failed ! Want %v ,Got = %v", want, got)
 		}

@@ -5,16 +5,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Router ...
 type Router struct {
 	Router  *gin.Engine
 	Handler handler.AppHandler
 }
 
+// AppRouter ...
 type AppRouter interface {
 	Routes() *gin.Engine
 }
 
-//...
+// NewRouter ...
 func NewRouter(h handler.AppHandler) Router {
 	rt := gin.Default()
 	return Router{
@@ -27,7 +29,7 @@ func init() {
 	gin.SetMode(gin.ReleaseMode)
 }
 
-//"Routes ..."
+// Routes ...
 func (r *Router) Routes() (*gin.Engine, gin.RoutesInfo) {
 	r.Router.GET("/", r.Handler.HealthHandler)
 	r.Router.POST("/signup", r.Handler.SignUpUser)

@@ -6,15 +6,12 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-// BindingError .. struct to bind error
+// BindingError ..
 type BindingError struct {
 	Errors map[string]interface{} `json:"errors"`
 }
 
-// To handle the error returned by c.Bind in gin framework
-// https://github.com/go-playground/validator/blob/v9/_examples/translations/main.go
-
-// NewValidatorError ... function to extract and format validation errors
+// NewValidatorError ...
 func NewValidatorError(err error) BindingError {
 	res := BindingError{}
 	res.Errors = make(map[string]interface{})

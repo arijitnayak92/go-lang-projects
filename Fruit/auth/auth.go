@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/arijitnayak92/taskAfford/Fruit/domain"
+	"github.com/arijitnayak92/taskAfford/Fruit/utils"
 	"github.com/gin-gonic/gin"
 )
 
 func TokenAuthMiddleware() gin.HandlerFunc {
 	return gin.HandlerFunc(func(c *gin.Context) {
-		err := domain.UserMethods.TokenValid(c.Request)
+		u := utils.NewUtil()
+		err := u.TokenValid(c.Request)
 		fmt.Println("in auth")
 		fmt.Println(err)
 		if err != nil {
@@ -18,7 +19,8 @@ func TokenAuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		accessDetails, _ := domain.UserMethods.ExtractTokenMetadata(c.Request)
+
+		accessDetails, _ := u.ExtractTokenMetadata(c.Request)
 		c.Set("accessDetails", accessDetails)
 		c.Next()
 	})

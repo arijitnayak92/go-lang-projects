@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"gitlab.com/affordmed/fruit-seller-b-backend/models"
+	"github.com/arijitnayak92/taskAfford/Fruit2/models"
 
 	"github.com/DATA-DOG/go-sqlmock"
 )
@@ -31,14 +31,14 @@ func TestPostgresRepo_CreateUser(t *testing.T) {
 		repo := &PostgresRepo{db}
 		query := `INSERT INTO users (email,cartid,password,firstname,lastname,role,createdat) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING email;`
 		prep := mock.ExpectQuery(regexp.QuoteMeta(query))
-		prep.WithArgs(u.Email, u.CartID, u.Password, u.FirstName, u.LastName, u.Role, u.CreatedAt).WillReturnRows(sqlmock.NewRows([]string{"email", "cartid", "password", "firstname", "lastname", "role", "createdat"}).AddRow(u.Email, u.CartID, u.Password, u.FirstName, u.LastName, u.Role, u.CreatedAt))
+		prep.WithArgs(u.Email, u.CartID, u.Password, u.FirstName, u.LastName, u.Role, u.CreatedAt).WillReturnRows(sqlmock.NewRows([]string{"email"}).AddRow(u.Email))
 
 		res, err := repo.CreateUser(u)
 		if err != nil {
 			t.Errorf("Error in CreateUser: %v", err)
 		}
 
-		if res != u.Email {
+		if res == false {
 			t.Error("Error in email :", res)
 		}
 	})

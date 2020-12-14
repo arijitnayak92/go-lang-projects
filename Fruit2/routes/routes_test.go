@@ -3,7 +3,7 @@ package routes
 import (
 	"testing"
 
-	"gitlab.com/affordmed/fruit-seller-b-backend/handler"
+	"github.com/arijitnayak92/taskAfford/Fruit2/handler"
 )
 
 func TestSetupRoutes(t *testing.T) {

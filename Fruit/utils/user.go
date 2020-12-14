@@ -7,16 +7,15 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var EmailRegex = "^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$"
+// EmailRegex ...
+var EmailRegex = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
 
-// PasswordRegex : Minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character
-
-// "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$"
-
+//IsEmail ...
 func (u *Util) IsEmail(email string) (bool, error) {
 	return regexp.MatchString(EmailRegex, email)
 }
 
+// PasswordValidation ...
 func (u *Util) PasswordValidation(password string) (bool, error) {
 	if len(password) < 8 {
 		lenError := errors.New("Password Length is less than 8")
@@ -45,6 +44,7 @@ func (u *Util) PasswordValidation(password string) (bool, error) {
 	return true, nil
 }
 
+// HashPassword ...
 func (u *Util) HashPassword(password string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
@@ -54,6 +54,7 @@ func (u *Util) HashPassword(password string) (string, error) {
 	return string(hashedPassword), nil
 }
 
+// CompareHashedPasswords ...
 func (u *Util) CompareHashedPasswords(password, hashedPassword string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 	if err != nil {

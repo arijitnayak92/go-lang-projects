@@ -1,9 +1,9 @@
 package routes
 
 import (
+	"github.com/arijitnayak92/taskAfford/Fruit2/handler"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"gitlab.com/affordmed/fruit-seller-b-backend/handler"
 )
 
 // Router : struct contains router of type *gin.Engine

@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-//...
+// HealthHandler ...
 func (h *Handler) HealthHandler(c *gin.Context) {
 	postgresDBStatus := h.domain.GetPostgresHealth()
 	mongoDBStatus := h.domain.GetMongoHealth()

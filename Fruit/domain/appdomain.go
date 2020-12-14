@@ -11,7 +11,7 @@ import (
 type AppDomain interface {
 	GetPostgresHealth() bool
 	GetMongoHealth() bool
-	UserSignup(email string, password string, firstname string, lastname string, role string) (bool, error)
+	UserSignup(email string, password string, firstname string, lastname string, role string, cartid string) (bool, error)
 	GetUser(email string) (*model.User, error)
 	Login(email string, password string) (string, error)
 }

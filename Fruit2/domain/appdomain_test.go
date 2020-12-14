@@ -3,11 +3,11 @@ package domain
 import (
 	"testing"
 
-	"gitlab.com/affordmed/fruit-seller-b-backend/apperrors"
-	mocks "gitlab.com/affordmed/fruit-seller-b-backend/mocks/repository"
+	"github.com/arijitnayak92/taskAfford/Fruit2/apperrors"
+	mocks "github.com/arijitnayak92/taskAfford/Fruit2/mocks/repository"
 
+	"github.com/arijitnayak92/taskAfford/Fruit2/db"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/affordmed/fruit-seller-b-backend/db"
 )
 
 var appDomainMock appsDomainMock

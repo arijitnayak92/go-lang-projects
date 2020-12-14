@@ -1,4 +1,4 @@
-module gitlab.com/affordmed/fruit-seller-b-backend
+module github.com/arijitnayak92/taskAfford/Fruit2
 
 go 1.15
 
@@ -6,21 +6,11 @@ require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-gonic/gin v1.6.3
-	github.com/go-playground/validator/v10 v10.4.1
-	github.com/golang/mock v1.4.4 // indirect
-	github.com/golang/protobuf v1.4.3 // indirect
-	github.com/google/uuid v1.1.2
+	github.com/go-playground/validator/v10 v10.2.0
 	github.com/joho/godotenv v1.3.0
-	github.com/json-iterator/go v1.1.10 // indirect
 	github.com/lib/pq v1.9.0
-	github.com/mdempsky/unconvert v0.0.0-20200228143138-95ecdbfc0b5f // indirect
-	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
-	github.com/modern-go/reflect2 v1.0.1 // indirect
+	github.com/opennota/check v0.0.0-20180911053232-0c771f5545ff // indirect
 	github.com/stretchr/testify v1.6.1
-	github.com/ugorji/go v1.2.1 // indirect
 	go.mongodb.org/mongo-driver v1.4.4
-	golang.org/x/crypto v0.0.0-20201203163018-be400aefbc4c
-	golang.org/x/sys v0.0.0-20201204225414-ed752295db88 // indirect
-	google.golang.org/protobuf v1.25.0 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
+	golang.org/x/crypto v0.0.0-20190530122614-20be4c3c3ed5
 )

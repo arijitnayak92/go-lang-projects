@@ -4,15 +4,15 @@ import (
 	"errors"
 	"time"
 
-	"gitlab.com/affordmed/fruit-seller-b-backend/apperrors"
-	"gitlab.com/affordmed/fruit-seller-b-backend/db"
-	"gitlab.com/affordmed/fruit-seller-b-backend/models"
-	"gitlab.com/affordmed/fruit-seller-b-backend/utils"
+	"github.com/arijitnayak92/taskAfford/Fruit2/apperrors"
+	"github.com/arijitnayak92/taskAfford/Fruit2/db"
+	"github.com/arijitnayak92/taskAfford/Fruit2/models"
+	"github.com/arijitnayak92/taskAfford/Fruit2/utils"
 )
 
 // UserDomain Interface
 type UserDomain interface {
-	AddUser(user models.User) (string, error)
+	AddUser(user models.User) (bool, error)
 }
 
 // User structs
@@ -26,19 +26,18 @@ func NewUser(db db.UserRepository) *User {
 }
 
 // AddUser ..domain method to add user.
-func (u *User) AddUser(user models.User) (string, error) {
+func (u *User) AddUser(user models.User) (bool, error) {
 
 	user.Password = utils.GetHash([]byte(user.Password))
 	user.ConfirmPassword = ""
 	user.Role = "User"
 	user.CreatedAt = time.Now()
-	//user.UpdatedAt = time.Now()
-	email, err := u.userRepo.CreateUser(user)
+	_, err := u.userRepo.CreateUser(user)
 	if err != nil {
 		if errors.Is(err, apperrors.ErrResourceAlreadyExists) {
-			return "", apperrors.ErrResourceAlreadyExists
+			return false, apperrors.ErrResourceAlreadyExists
 		}
-		return "", apperrors.ErrActionFailed
+		return false, apperrors.ErrActionFailed
 	}
-	return email, nil
+	return true, nil
 }

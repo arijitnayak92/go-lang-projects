@@ -1,8 +1,8 @@
 package mocks
 
 import (
+	"github.com/arijitnayak92/taskAfford/Fruit2/models"
 	"github.com/stretchr/testify/mock"
-	"gitlab.com/affordmed/fruit-seller-b-backend/models"
 )
 
 // MockUserRepository ...
@@ -11,10 +11,10 @@ type MockUserRepository struct {
 }
 
 // CreateUser : mocked create user for unit testing
-func (mock *MockUserRepository) CreateUser(m models.User) (string, error) {
+func (mock *MockUserRepository) CreateUser(m models.User) (bool, error) {
 
 	args := mock.Called()
 	result := args.Get(0)
-	return result.(string), args.Error(1)
+	return result.(bool), args.Error(1)
 
 }

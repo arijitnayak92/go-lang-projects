@@ -36,6 +36,7 @@ func (u *Util) CreateToken(email string) (*TokenDetails, error) {
 	return td, nil
 }
 
+// VerifyToken ...
 func (u *Util) VerifyToken(tokenString string) (*jwt.Token, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -49,6 +50,7 @@ func (u *Util) VerifyToken(tokenString string) (*jwt.Token, error) {
 	return token, nil
 }
 
+// TokenValid ...
 func (u *Util) TokenValid(t string) error {
 	token, err := u.VerifyToken(t)
 	if err != nil {

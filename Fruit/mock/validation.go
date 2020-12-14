@@ -11,17 +11,21 @@ type Validation struct {
 	mock.Mock
 }
 
+// NewValidation ...
+func NewValidation() *Validation {
+	return &Validation{}
+}
+
 // SignUpValidation ...
-func (mock *Validation) SignUpValidation(c *gin.Context) (*validation.SignUpRequest, error) {
-	// args := mock.Called()
-	// return nil, args.Error(0)
+func (mock *Validation) SignUpValidation(_ *gin.Context) (*validation.SignUpRequest, error) {
+	args := mock.Called()
+	result := args.Get(0)
+	return result.(*validation.SignUpRequest), args.Error(1)
+}
 
-	return &validation.SignUpRequest{
-		Email:           "abc@gmail.com",
-		Password:        "Arijitnayak@92",
-		ConfirmPassword: "Arijitnayak@92",
-		FirstName:       "Arijit",
-		LastName:        "Nayak",
-	}, nil
-
+// SignInValidation ...
+func (mock *Validation) SignInValidation(_ *gin.Context) (*validation.SignInRequest, error) {
+	args := mock.Called()
+	result := args.Get(0)
+	return result.(*validation.SignInRequest), args.Error(1)
 }

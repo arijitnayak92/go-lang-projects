@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
@@ -17,4 +18,14 @@ type AppPostgres interface {
 // AppMongo ...
 type AppMongo interface {
 	Ping(ctx context.Context, rp *readpref.ReadPref) error
+}
+
+// Mongo ...
+type Mongo struct {
+	DB *mongo.Client
+}
+
+// Postgres ...
+type Postgres struct {
+	DB *sql.DB
 }

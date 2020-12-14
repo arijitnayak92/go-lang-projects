@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"gitlab.com/affordmed/fruit-seller-b-backend/apperrors"
+	"github.com/arijitnayak92/taskAfford/Fruit2/apperrors"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )

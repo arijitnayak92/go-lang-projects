@@ -8,10 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type Mongo struct {
-	DB *mongo.Client
-}
-
+// NewMongo ...
 func NewMongo(appCtx *appcontext.AppContext) (*mongo.Client, error) {
 	clientOptions := options.Client().ApplyURI(appCtx.MongoURI)
 

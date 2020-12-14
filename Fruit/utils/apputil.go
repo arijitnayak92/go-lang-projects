@@ -2,6 +2,7 @@ package utils
 
 import "github.com/dgrijalva/jwt-go"
 
+// AppUtil ...
 type AppUtil interface {
 	HashPassword(password string) (string, error)
 	CompareHashedPasswords(password, hashedPassword string) bool
@@ -12,9 +13,11 @@ type AppUtil interface {
 	VerifyToken(tokenString string) (*jwt.Token, error)
 }
 
+// Util ...
 type Util struct {
 }
 
+// NewUtil ...
 func NewUtil() *Util {
 	return &Util{}
 }

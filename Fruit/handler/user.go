@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// SignUpUser ...
 func (h *Handler) SignUpUser(c *gin.Context) {
 	req, errs := h.validation.SignUpValidation(c)
 	if errs != nil {
@@ -20,7 +21,7 @@ func (h *Handler) SignUpUser(c *gin.Context) {
 		})
 	}
 
-	_, err := h.domain.UserSignup(req.Email, hashedPassword, req.FirstName, req.LastName, "User")
+	_, err := h.domain.UserSignup(req.Email, hashedPassword, req.FirstName, req.LastName, "User", "")
 
 	if err != nil {
 		if err == apperrors.ErrUserAlreadyPresent {
@@ -41,6 +42,7 @@ func (h *Handler) SignUpUser(c *gin.Context) {
 	})
 }
 
+// Login ...
 func (h *Handler) Login(c *gin.Context) {
 	req, errs := h.validation.SignInValidation(c)
 	if errs != nil {

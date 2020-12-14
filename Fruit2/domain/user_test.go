@@ -3,12 +3,12 @@ package domain
 import (
 	"testing"
 
+	"github.com/arijitnayak92/taskAfford/Fruit2/apperrors"
+	mocks "github.com/arijitnayak92/taskAfford/Fruit2/mocks/repository"
+	"github.com/arijitnayak92/taskAfford/Fruit2/models"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/affordmed/fruit-seller-b-backend/apperrors"
-	mocks "gitlab.com/affordmed/fruit-seller-b-backend/mocks/repository"
-	"gitlab.com/affordmed/fruit-seller-b-backend/models"
 
-	"gitlab.com/affordmed/fruit-seller-b-backend/db"
+	"github.com/arijitnayak92/taskAfford/Fruit2/db"
 )
 
 func TestNewUser(t *testing.T) {
@@ -33,10 +33,10 @@ func TestUser_AddUser(t *testing.T) {
 		}
 		mockUserRepo.On("CreateUser").Return(testUser.Email, nil)
 		testUserDomain := NewUser(mockUserRepo)
-		email, err := testUserDomain.AddUser(testUser)
+		stat, err := testUserDomain.AddUser(testUser)
 
 		assert.NoError(t, err)
-		assert.Equal(t, "Test@123.com", email)
+		assert.Equal(t, true, stat)
 
 	})
 	t.Run("When user addition Failed!!", func(t *testing.T) {
@@ -50,12 +50,12 @@ func TestUser_AddUser(t *testing.T) {
 		}
 		mockUserRepo.On("CreateUser").Return("", apperrors.ErrActionFailed)
 		testUserDomain := NewUser(mockUserRepo)
-		email, err := testUserDomain.AddUser(testUser)
+		stat, err := testUserDomain.AddUser(testUser)
 
 		if assert.Error(t, err) {
 			assert.Equal(t, apperrors.ErrActionFailed, err)
 		}
-		assert.Equal(t, "", email)
+		assert.Equal(t, false, stat)
 
 	})
 	t.Run("When user already exists!!", func(t *testing.T) {
@@ -69,12 +69,12 @@ func TestUser_AddUser(t *testing.T) {
 		}
 		mockUserRepo.On("CreateUser").Return("", apperrors.ErrResourceAlreadyExists)
 		testUserDomain := NewUser(mockUserRepo)
-		email, err := testUserDomain.AddUser(testUser)
+		stat, err := testUserDomain.AddUser(testUser)
 
 		if assert.Error(t, err) {
 			assert.Equal(t, apperrors.ErrResourceAlreadyExists, err)
 		}
-		assert.Equal(t, "", email)
+		assert.Equal(t, false, stat)
 
 	})
 

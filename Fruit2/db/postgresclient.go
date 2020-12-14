@@ -5,8 +5,8 @@ import (
 	"log"
 
 	// Postgres driver import
+	"github.com/arijitnayak92/taskAfford/Fruit2/apperrors"
 	_ "github.com/lib/pq"
-	"gitlab.com/affordmed/fruit-seller-b-backend/apperrors"
 )
 
 // ConnectToPostgres func to connect to mongodb

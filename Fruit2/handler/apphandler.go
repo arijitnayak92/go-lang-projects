@@ -3,8 +3,8 @@ package handler
 import (
 	"net/http"
 
+	"github.com/arijitnayak92/taskAfford/Fruit2/domain"
 	"github.com/gin-gonic/gin"
-	"gitlab.com/affordmed/fruit-seller-b-backend/domain"
 )
 
 // AppHandler interface
@@ -32,16 +32,6 @@ type ProductHandler interface{}
 
 // CartHandler : CartHandler Interface.
 type CartHandler interface{}
-
-// // NewProduct : Constructor for Product struct.
-// func NewProduct(domain domain.ProductDomain) *Product {
-// 	return &Product{domain: domain}
-// }
-
-// // NewCart : Constructor for Cart struct.
-// func NewCart(domain domain.CartDomain) *Cart {
-// 	return &Cart{domain: domain}
-// }
 
 // NewHandler ....
 func NewHandler(appDomain domain.AppDomain) *Handler {

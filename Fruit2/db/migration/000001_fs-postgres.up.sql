@@ -2,12 +2,11 @@
 CREATE TABLE "users" (
   "email" varchar PRIMARY KEY,
   "password" varchar,
-  "firstname" varchar,
-  "lastname" varchar,
-  "role" varchar, 
-  "createdat" timestamp,
-  "updatedat" timestamp default current_timestamp,
-   "cartid" int
+  "firstName" varchar,
+  "lastName" varchar,
+  "role" varchar,
+  "createdAt" timestamp,
+   "cartId" int
 );
 
 CREATE TABLE "products" (
