@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option go_package = "./;pb";
+
+message NotificationRequest {
+    string userID = 1;
+    string targetID = 2;
+    string message = 3;
+}
+
+message NotificationResponse {
+    string notificationID = 1;
+}
+
+service Notification {
+    rpc PushNotification (NotificationRequest) returns (NotificationResponse);
+}
