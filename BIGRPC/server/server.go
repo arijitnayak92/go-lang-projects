@@ -4,6 +4,7 @@ import (
 	"log"
 	"net"
 
+	pb "github.com/arijitnayak92/go-lang-projects/BIGRPC/proto"
 	"google.golang.org/grpc"
 )
 
@@ -16,7 +17,8 @@ func main() {
 
 	// create grpc server
 	s := grpc.NewServer()
-	pb.RegisterMathServer(s, server{})
+
+	pb.RegisterNotificationServer(s, &NotificationServer{})
 
 	// and start...
 	if err := s.Serve(lis); err != nil {

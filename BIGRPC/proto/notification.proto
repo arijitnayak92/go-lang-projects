@@ -13,5 +13,5 @@ message NotificationResponse {
 }
 
 service Notification {
-    rpc PushNotification (NotificationRequest) returns (NotificationResponse);
+    rpc PushNotification (stream NotificationRequest) returns (stream NotificationResponse);
 }

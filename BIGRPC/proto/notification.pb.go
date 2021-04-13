@@ -148,13 +148,13 @@ var file_notification_proto_rawDesc = []byte{
 	0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
 	0x65, 0x12, 0x26, 0x0a, 0x0e, 0x6e, 0x6f, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f,
 	0x6e, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0e, 0x6e, 0x6f, 0x74, 0x69, 0x66,
-	0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x49, 0x44, 0x32, 0x4f, 0x0a, 0x0c, 0x4e, 0x6f, 0x74,
-	0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x3f, 0x0a, 0x10, 0x50, 0x75, 0x73,
+	0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x49, 0x44, 0x32, 0x53, 0x0a, 0x0c, 0x4e, 0x6f, 0x74,
+	0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x43, 0x0a, 0x10, 0x50, 0x75, 0x73,
 	0x68, 0x4e, 0x6f, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x14, 0x2e,
 	0x4e, 0x6f, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75,
 	0x65, 0x73, 0x74, 0x1a, 0x15, 0x2e, 0x4e, 0x6f, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x69,
-	0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x07, 0x5a, 0x05, 0x2e, 0x2f,
-	0x3b, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x28, 0x01, 0x30, 0x01, 0x42, 0x07,
+	0x5a, 0x05, 0x2e, 0x2f, 0x3b, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -247,7 +247,7 @@ const _ = grpc.SupportPackageIsVersion6
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type NotificationClient interface {
-	PushNotification(ctx context.Context, in *NotificationRequest, opts ...grpc.CallOption) (*NotificationResponse, error)
+	PushNotification(ctx context.Context, opts ...grpc.CallOption) (Notification_PushNotificationClient, error)
 }
 
 type notificationClient struct {
@@ -258,59 +258,91 @@ func NewNotificationClient(cc grpc.ClientConnInterface) NotificationClient {
 	return &notificationClient{cc}
 }
 
-func (c *notificationClient) PushNotification(ctx context.Context, in *NotificationRequest, opts ...grpc.CallOption) (*NotificationResponse, error) {
-	out := new(NotificationResponse)
-	err := c.cc.Invoke(ctx, "/Notification/PushNotification", in, out, opts...)
+func (c *notificationClient) PushNotification(ctx context.Context, opts ...grpc.CallOption) (Notification_PushNotificationClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Notification_serviceDesc.Streams[0], "/Notification/PushNotification", opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &notificationPushNotificationClient{stream}
+	return x, nil
+}
+
+type Notification_PushNotificationClient interface {
+	Send(*NotificationRequest) error
+	Recv() (*NotificationResponse, error)
+	grpc.ClientStream
+}
+
+type notificationPushNotificationClient struct {
+	grpc.ClientStream
+}
+
+func (x *notificationPushNotificationClient) Send(m *NotificationRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *notificationPushNotificationClient) Recv() (*NotificationResponse, error) {
+	m := new(NotificationResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 // NotificationServer is the server API for Notification service.
 type NotificationServer interface {
-	PushNotification(context.Context, *NotificationRequest) (*NotificationResponse, error)
+	PushNotification(Notification_PushNotificationServer) error
 }
 
 // UnimplementedNotificationServer can be embedded to have forward compatible implementations.
 type UnimplementedNotificationServer struct {
 }
 
-func (*UnimplementedNotificationServer) PushNotification(context.Context, *NotificationRequest) (*NotificationResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method PushNotification not implemented")
+func (*UnimplementedNotificationServer) PushNotification(Notification_PushNotificationServer) error {
+	return status.Errorf(codes.Unimplemented, "method PushNotification not implemented")
 }
 
 func RegisterNotificationServer(s *grpc.Server, srv NotificationServer) {
 	s.RegisterService(&_Notification_serviceDesc, srv)
 }
 
-func _Notification_PushNotification_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(NotificationRequest)
-	if err := dec(in); err != nil {
+func _Notification_PushNotification_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(NotificationServer).PushNotification(&notificationPushNotificationServer{stream})
+}
+
+type Notification_PushNotificationServer interface {
+	Send(*NotificationResponse) error
+	Recv() (*NotificationRequest, error)
+	grpc.ServerStream
+}
+
+type notificationPushNotificationServer struct {
+	grpc.ServerStream
+}
+
+func (x *notificationPushNotificationServer) Send(m *NotificationResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *notificationPushNotificationServer) Recv() (*NotificationRequest, error) {
+	m := new(NotificationRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
-	if interceptor == nil {
-		return srv.(NotificationServer).PushNotification(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/Notification/PushNotification",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NotificationServer).PushNotification(ctx, req.(*NotificationRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	return m, nil
 }
 
 var _Notification_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "Notification",
 	HandlerType: (*NotificationServer)(nil),
-	Methods: []grpc.MethodDesc{
+	Methods:     []grpc.MethodDesc{},
+	Streams: []grpc.StreamDesc{
 		{
-			MethodName: "PushNotification",
-			Handler:    _Notification_PushNotification_Handler,
+			StreamName:    "PushNotification",
+			Handler:       _Notification_PushNotification_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
 	Metadata: "notification.proto",
 }
