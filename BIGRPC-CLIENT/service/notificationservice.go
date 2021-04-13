@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"log"
 	"time"
@@ -24,13 +25,15 @@ func NewNotificationClient(client pb.NotificationClient) *NotificationCient {
 
 func (n *NotificationCient) PushNotification() (string, error) {
 
-	stream, err := n.client.PushNotification(context.Background())
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	stream, err := n.client.PushNotification(ctx)
 	if err != nil {
 		log.Fatalf("openn stream error %v", err)
 	}
 
-	ctx := stream.Context()
-	done := make(chan bool)
+	waitResponse := make(chan error)
 
 	// first goroutine sends random increasing numbers to stream
 	// and closes int after 10 iterations
@@ -48,9 +51,13 @@ func (n *NotificationCient) PushNotification() (string, error) {
 			}
 			time.Sleep(time.Millisecond * 200)
 		}
-		if err := stream.CloseSend(); err != nil {
+		err := stream.CloseSend()
+		if err != nil {
 			log.Println(err)
 		}
+
+		waitResponse <- err
+
 	}()
 
 	// second goroutine receives data from stream
@@ -59,16 +66,17 @@ func (n *NotificationCient) PushNotification() (string, error) {
 	// if stream is finished it closes done channel
 	go func() {
 		for {
-			resp, err := stream.Recv()
+			res, err := stream.Recv()
 			if err == io.EOF {
-				close(done)
+				waitResponse <- nil
 				return
 			}
 			if err != nil {
-				log.Fatalf("can not receive %v", err)
+				waitResponse <- fmt.Errorf("cannot receive stream response: %v", err)
+				return
 			}
 
-			log.Println("new received", resp.NotificationID)
+			log.Println("new received", res.NotificationID)
 		}
 	}()
 
@@ -79,10 +87,10 @@ func (n *NotificationCient) PushNotification() (string, error) {
 		if err := ctx.Err(); err != nil {
 			log.Println(err)
 		}
-		close(done)
+		close(waitResponse)
 	}()
 
-	<-done
+	err = <-waitResponse
 	log.Println("done !")
-	return "", nil
+	return "", err
 }
