@@ -1,33 +1,34 @@
-package client
+package service
 
 import (
 	"context"
 	"io"
 	"log"
-	"math/rand"
 	"time"
 
 	pb "github.com/arijitnayak92/go-lang-projects/BIGRPC/proto"
-	"google.golang.org/grpc"
+	"github.com/twinj/uuid"
 )
 
-func main() {
-	rand.Seed(time.Now().Unix())
+type NotificationService interface {
+	PushNotification() (string, error)
+}
 
-	// dail server
-	conn, err := grpc.Dial(":50005", grpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("can not connect with server %v", err)
-	}
+type NotificationCient struct {
+	client pb.NotificationClient
+}
 
-	// create stream
-	client := pb.NewNotificationClient(conn)
-	stream, err := client.PushNotification(context.Background())
+func NewNotificationClient(client pb.NotificationClient) *NotificationCient {
+	return &NotificationCient{client: client}
+}
+
+func (n *NotificationCient) PushNotification() (string, error) {
+
+	stream, err := n.client.PushNotification(context.Background())
 	if err != nil {
 		log.Fatalf("openn stream error %v", err)
 	}
 
-	var max int32
 	ctx := stream.Context()
 	done := make(chan bool)
 
@@ -36,12 +37,10 @@ func main() {
 	go func() {
 		for i := 1; i <= 10; i++ {
 			// generate random nummber and send it to stream
-			rnd := int32(rand.Intn(i))
-			rnd2 := int32(rand.Intn(i))
 
 			req := pb.NotificationRequest{
-				UserID:   string(rnd),
-				TargetID: string(rnd2),
+				UserID:   uuid.NewV4().String(),
+				TargetID: uuid.NewV4().String(),
 				Message:  "new notification",
 			}
 			if err := stream.Send(&req); err != nil {
@@ -84,5 +83,6 @@ func main() {
 	}()
 
 	<-done
-	log.Printf("finished with max=%d", max)
+	log.Println("done !")
+	return "", nil
 }
